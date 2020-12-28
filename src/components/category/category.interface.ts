@@ -1,18 +1,15 @@
-import { Document } from 'mongoose';
+import { Document } from 'mongoose'
+import { IUserModel } from '../user/user.schema';
+
 
 export interface ICategory {
-    title: string;
-    icon: string;
-
-    sponsorName?: string,
-
-    sponsorName_hindi?: String,
-
-    sponsorImage?: string
-
-    showId: string
+    name: string;
+    numberOfLevels: number,
+    creator: IUserModel['_id']
+    icon?: string,
+    active : boolean
 }
 
 export interface ICategoryModel extends ICategory, Document {
-
+    add(): Promise<ICategoryModel>
 }

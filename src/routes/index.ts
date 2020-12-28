@@ -1,4 +1,4 @@
-import award from '../components/awards'
+// import award from '../components/awards'
 export default [
-    ...award
+    
 ];

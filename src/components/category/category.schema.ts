@@ -1,17 +1,37 @@
 import { Schema, Model, model } from 'mongoose'
-import { ICategoryModel } from './category.interface';
+import { ICategoryModel } from './category.interface'
+// import Wallet from '../wallet/wallet.model'
 
-let categorySchema = new Schema({
-    title: { type: String, required: true },
-    icon: { type: String, required: true },
+const CategorySchema = new Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    numberOfLevels: {
+        type: Number,
+        required: true
+    },
+    creator: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
+    },
+    icon: {
+        type: String,
+        default: 'https://polbol-media.s3.ap-south-1.amazonaws.com/ic_user_dummy.jpg',
+        required: true
+    },
+    active: {
+        type: Boolean,
+        default: false
+    }
+}, {
+    timestamps: true
+})
 
-    sponsorName: String,
+CategorySchema.methods.add = async function () {
+    // await Wallet.updateNewAddedCategory(this._id);
+    await this.save()
+}
 
-    sponsorName_hindi: String,
-
-    sponsorImage: String,
-
-    showId: { type: Schema.Types.ObjectId, ref: 'Show', required: true },
-});
-
-export const Category: Model<ICategoryModel> = model<ICategoryModel>('Category', categorySchema);
+export const Category: Model<ICategoryModel> = model<ICategoryModel>("Category", CategorySchema); 

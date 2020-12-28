@@ -1,0 +1,248 @@
+import { Quiz } from "./quiz.schema";
+import { IQuiz, IQuizModel } from "./quiz.interface";
+import { isValidMongoId, pruneFields } from "../../lib/helpers";
+import { HTTP400Error } from "../../lib/utils/httpErrors";
+import { ObjectID } from "bson";
+import { mongoDBProjectFields } from "../../lib/utils";
+import Result from '../result/result.model'
+// import Wallet from '../wallet/wallet.model'
+import _ from 'lodash'
+import Question from '../question/question.model'
+
+
+
+export class QuizModel {
+  private default: string = "title maxScore timeAlloted level category icon metadata";
+  private fieldsOfUser = "firstName lastName avatar userName createdAt";
+  private pruningFields: string = '_id creator createdAt updatedAt __v';
+  private questionFields: string = "content level categoryId options points";
+  public rulePdf: string = 'https://drive.google.com/uc?export=view&id=1864Oc6WPcYQLq7wXyw4ZWIcN885_NVhU'
+
+  async create(body: any, userId: string): Promise<IQuizModel> {
+    try {
+      const temp = { ...body }
+      temp.creator = userId;
+      temp.questions = body.questions;
+      temp.metadata = body.metadata;
+      const q: IQuizModel = new Quiz(temp);
+      const data = await q.add();
+      return data.populate('creator', this.fieldsOfUser).execPopulate();
+    } catch (e) {
+      console.log(e)
+      throw new HTTP400Error(e);
+    }
+  }
+
+  async fetchQuizByCondition(condition: any) {
+    return Quiz.aggregate([
+      {
+        $match: condition
+      },
+      {
+        $sort: { 'createdAt': -1 }
+      }, {
+        $lookup: {
+          from: "users",
+          localField: "creator",
+          foreignField: "_id",
+          as: "user"
+        }
+      }, {
+        $unwind: { path: '$user' }
+      },
+      {
+        $project: {
+          ...mongoDBProjectFields(this.fieldsOfUser, 'user'),
+          ...mongoDBProjectFields(this.default),
+        }
+      }
+    ]);
+  }
+
+  async fetchQuiz(query: any) {
+    const condition: any = {};
+    if (query.level) {
+      condition.level = Number(query.level);
+    }
+    if (query.categoryId) {
+      condition.categoryId = new ObjectID(query.categoryId);
+    }
+    if (query.creator) {
+      condition.cretaor = query.creator
+    }
+    let data = await this.fetchQuizByCondition(condition)
+    return {
+      payload: data
+    };
+  }
+
+  async fetchByCategory(body: any, userId: string) {
+    let quizzes = await Quiz.find({ categoryId: body.categoryId }).select({ ...mongoDBProjectFields(this.default) }).lean();
+    let score = 10//await Wallet.getCategoryScore(userId, body.categoryId);
+    let maxLevelUnolocked = Result.unlockLevelCalculator(score);
+    return { quizzes: quizzes, score: score, maxLevelUnolocked: maxLevelUnolocked }
+  }
+
+  async fetchById(id: string, user: string) {
+
+    if (!isValidMongoId(id)) {
+      throw new Error("Not Valid MongoDB ID");
+    }
+    const data = await this.fetchQuizByCondition({ _id: new ObjectID(id) });
+    if (data && data.length === 1) {
+      return {
+        payload: data
+      };
+    }
+    throw new HTTP400Error("Document Not Found");
+  }
+
+  async delete(id: string) {
+    if (isValidMongoId(id)) {
+      console.log(id);
+      const data = await Quiz.findByIdAndDelete(id);
+      if (data) {
+        return data;
+      }
+      throw new HTTP400Error("Document Not Found");
+    } else {
+      throw new HTTP400Error("Not Valid MongoDB ID");
+    }
+  }
+
+  async update(id: string, body: IQuiz) {
+    if (isValidMongoId(id)) {
+      pruneFields(body, this.pruningFields);
+      console.log(body);
+      const data = await Quiz.findByIdAndUpdate(id, body, { new: true, runValidators: true });
+      if (data) {
+        return data;
+      }
+      throw new HTTP400Error("Document Not Found");
+    } else {
+      throw new HTTP400Error("Not Valid MongoDB ID");
+    }
+  }
+
+  // Under Development || current error: $sample requires number (Optimized Query for future use)
+
+  async fetchRandomQuestions(quizId: string) {
+    return await Quiz.aggregate([
+      {
+        $match: { _id: new ObjectID(quizId) }
+      },
+      {
+        $unwind: { path: '$questions' }
+      },
+      {
+        $lookup: {
+          from: 'questions',
+          let: {
+            categoryId: '$questions.category',
+            level: '$questions.level',
+            questionCount: 5
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$categoryId", "$$categoryId"] },
+                    { $eq: ["$level", "$$level"] }
+                  ]
+                }
+              }
+            },
+            {
+              $sample: { size: "$$questionCount" }
+            },
+            {
+              $sort: { points: 1 }
+            }
+          ],
+          as: 'question'
+        }
+      },
+      {
+        $unwind: { path: '$question' }
+      },
+      {
+        $project: {
+          ...mongoDBProjectFields(this.questionFields, 'question'),
+          _id: 0
+        }
+      }
+    ])
+  }
+
+  // End of optimized query
+
+  async start(userId: string, quizId: string) {
+    if (isValidMongoId(userId.toString()) && isValidMongoId(quizId.toString())) {
+      // await Wallet.fetch(userId);
+      let quiz = await Quiz.findById(quizId);
+      let scoreTillNow =100 //await Wallet.getCategoryScore(userId, quiz!.categoryId);
+      let maxLevelUnolocked = Result.unlockLevelCalculator(scoreTillNow);
+      if (quiz) {
+        let questionsArray: any[] = []
+        for (let condition of quiz.questions) {
+          let data = await Question.fetchRandomQuestions(condition);
+          questionsArray = _.concat(questionsArray, _.cloneDeep(data))
+        }
+        let newScore : any = {
+          userId: userId,
+          quizId: quizId,
+          score: 0,
+          questionsAnswered: [],
+          countCorrect: 0,
+          maxLevelUnlockedAtStart: maxLevelUnolocked,
+          maxLevelUnlockedAtEnd: 0
+        }
+        let result = await Result.create(newScore);
+        questionsArray = _.shuffle(questionsArray)
+        return { resultId: result._id, questions: questionsArray };
+      } else {
+        throw new HTTP400Error("Not a valid Quiz ID");
+      }
+    } else {
+      throw new HTTP400Error("Not a valid mongoDB ID");
+    }
+  }
+
+  public async takeHint(body: any, userId: string) {
+    try {
+      let response ={success:true} //await Wallet.takeHint(body.cost,userId);
+      if (response.success) {
+        let question = await Question.fetchAnswer(body.quesId);
+        console.log(question)
+        return { quesId: question._id, answer: question.answer, success: true }
+      } else {
+        return { success: false }
+      }
+    } catch (e) {
+      throw new HTTP400Error(e);
+    }
+  }
+
+  public async unlockNextLevel(body: any, userId: string) {
+    try {
+      if (isValidMongoId(body.categoryId)) {
+        let scoreTillNow =100 //await Wallet.getCategoryScore(userId, body.categoryId);
+        let points = Result.getNext500Multiple(scoreTillNow) - scoreTillNow;
+        let a = {
+          points: points,
+          categoryId: body.categoryId
+        }
+        return 100 //await Wallet.unlockLevel(a, userId);
+      } else {
+        throw new HTTP400Error('Invalid MongoDB Id')
+      }
+    } catch (e) {
+      console.log(e)
+      throw new HTTP400Error(e);
+    }
+  }
+
+}
+
+export default new QuizModel();
