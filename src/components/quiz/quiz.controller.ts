@@ -78,7 +78,7 @@ class QuizController {
   public start = async (req: Request, res: Response, next: NextFunction) => {
     const responseHandler = new ResponseHandler();
     try {
-      responseHandler.reqRes(req, res).onFetch(msg.START, await Quiz.start(req.userId as string, req.query.quizId)).send();
+      responseHandler.reqRes(req, res).onFetch(msg.START, await Quiz.start(req.userId as string, req.query.quizId , req.query.code)).send();
     } catch (e) {
       next(responseHandler.sendError(e));
     }

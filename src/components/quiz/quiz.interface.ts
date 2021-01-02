@@ -21,7 +21,8 @@ export interface IQuiz {
   code: string,
   visibility: string,
 
-  poolAmount: number
+  poolAmount: number,
+  scheduled:boolean
 }
 
 export interface IQuizModel extends IQuiz, Document {

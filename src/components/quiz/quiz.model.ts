@@ -8,12 +8,14 @@ import Result from '../result/result.model'
 // import Wallet from '../wallet/wallet.model'
 import _ from 'lodash'
 import Question from '../question/question.model'
+import {ikcPool} from '../IKCPool/ikcPool.schema' 
+import { PoolStatus } from "../IKCPool/ikcPool.interface";
 
 
 
 export class QuizModel {
-  private default: string = "title maxScore timeAlloted level category icon metadata";
-  private fieldsOfUser = "firstName lastName avatar userName createdAt";
+  private default: string = "title maxScore timeAlloted level category icon metadata visibility poolamount";
+  private fieldsOfUser = "firstName lastName avatar userName createdAt email";
   private pruningFields: string = '_id creator createdAt updatedAt __v';
   private questionFields: string = "content level categoryId options points";
   public rulePdf: string = 'https://drive.google.com/uc?export=view&id=1864Oc6WPcYQLq7wXyw4ZWIcN885_NVhU'
@@ -29,6 +31,30 @@ export class QuizModel {
       return data.populate('creator', this.fieldsOfUser).execPopulate();
     } catch (e) {
       console.log(e)
+      throw new HTTP400Error(e);
+    }
+  }
+
+  async registerForQuiz(userId: string, cost: number, roomId: string) {
+    try {
+      if (isValidMongoId(userId.toString()) && isValidMongoId(roomId.toString())) {
+        let exist = await ikcPool.findOne({ $and: [{ userId: userId }, { roomId: roomId }] });
+        if (!exist) {
+          let body = {
+            userId: userId,
+            cost: cost,
+            roomId: roomId,
+            status: PoolStatus.PENDING
+          }
+          let pool = new ikcPool(body);
+          return await pool.save();
+        } else {
+          return { alreadyRegistered: true }
+        }
+      } else {
+        throw new HTTP400Error('Not a valid mongoDB Id')
+      }
+    } catch (e) {
       throw new HTTP400Error(e);
     }
   }
@@ -81,6 +107,19 @@ export class QuizModel {
     let score = 10//await Wallet.getCategoryScore(userId, body.categoryId);
     let maxLevelUnolocked = Result.unlockLevelCalculator(score);
     return { quizzes: quizzes, score: score, maxLevelUnolocked: maxLevelUnolocked }
+  }
+
+  private async verifyCode(quizId: string, code: string): Promise<{ proceed: boolean }> {
+    let quiz: IQuizModel = await Quiz.findById(quizId);
+    if (quiz) {
+      if ((quiz.visibility == 'private' && quiz.code == code) || (quiz.visibility == 'public')) {
+        return { proceed: true }
+      } else {
+        return { proceed: false }
+      }
+    } else {
+      throw new HTTP400Error('Invalid Quiz Id')
+    }
   }
 
   async fetchById(id: string, user: string) {
@@ -177,9 +216,10 @@ export class QuizModel {
 
   // End of optimized query
 
-  async start(userId: string, quizId: string) {
+  async start(userId: string, quizId: string , code? :string) {
     if (isValidMongoId(userId.toString()) && isValidMongoId(quizId.toString())) {
       // await Wallet.fetch(userId);
+      let codeVerification = await this.verifyCode(quizId , code)
       let quiz = await Quiz.findById(quizId);
       let scoreTillNow =100 //await Wallet.getCategoryScore(userId, quiz!.categoryId);
       let maxLevelUnolocked = Result.unlockLevelCalculator(scoreTillNow);
@@ -222,6 +262,60 @@ export class QuizModel {
     } catch (e) {
       throw new HTTP400Error(e);
     }
+  }
+
+  public async fetchUsersToNotify(condition: any) {
+    try {
+      return Quiz.aggregate([
+        {
+          $match: condition
+        },
+        {
+          $lookup: {
+            from: 'ikcpools',
+            let: {
+              roomId: '$_id',
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [{ $eq: ['$roomId', '$$roomId'] }, { $eq: ['$notify', true] }]
+                  }
+                }
+              }
+            ],
+            as: 'ikcPools'
+          }
+        },
+        {
+          $unwind: { path: 'ikcPools'}
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: '$ikcPools._id',
+            foreignField: '_id',
+            as: 'user'
+          }
+        },
+        {
+          $unwind: { path: 'user'}
+        },
+        {
+          $project: {
+            ...mongoDBProjectFields('user', this.fieldsOfUser),
+            ...mongoDBProjectFields(this.default)
+          }
+        }
+      ])
+    } catch (e) {
+      throw new HTTP400Error(e);
+    }
+  }
+
+  public async senndQuizNotification(body:any){
+    body
   }
 
   public async unlockNextLevel(body: any, userId: string) {

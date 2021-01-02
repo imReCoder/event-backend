@@ -150,8 +150,8 @@ export class UserModel {
       let s = this.randomString(6);
       let body = {
         role: 'voter',
-        firstName: `PolBol_${s}`,
-        userName: `PolBol_${s}`,
+        firstName: `IKC10_${s}`,
+        userName: `IKC10_${s}`,
         lastName: ``,
         phone: phone
       }
@@ -294,47 +294,6 @@ export class UserModel {
       lastTime,
       maxCount: paginationConfig.MAX_USERS
     };
-  }
-
-  // ==========================================\\
-  //     Future whatsapp Integartion            \\
-  //===========================================\\
-
-  private async sendLinkToWhatsapp(hash: any, phone: string) {
-    const message = `Your Polbol login link is https://13.235.90.125:2112/api/v1/user/whatsAppAuth/callback?p=${hash.content}&i=${hash.iv}`;
-    console.log(message)
-    return sendMessage(phone, message);
-  }
-
-  public async loginWithWhatsApp(body: IUserModel) {
-    try {
-      const q: IUserModel = new User(body);
-      const data = await q.addNewUser();
-      let hash = encrypt(data._id.toString());
-      this.sendLinkToWhatsapp(hash, body.phone)
-      return { success: true };
-    } catch (e) {
-      throw new HTTP400Error(e)
-    }
-  }
-
-  public async whatsAppAuthCallback(body: any) {
-    try {
-      let decrypted = decrypt({ 'content': body.p, 'iv': body.i });
-      if (isValidMongoId(decrypted)) {
-        let data = await User.findById(decrypted);
-        if (data) {
-          const token = await this.addNewToken(decrypted, data);
-          return { data, token };
-        } else {
-          throw new HTTP400Error('Invalid URL Link')
-        }
-      } else {
-        throw new HTTP400Error('Invalid MongoDB ID')
-      }
-    } catch (e) {
-      throw new HTTP400Error(e)
-    }
   }
 
 }

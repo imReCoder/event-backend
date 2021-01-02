@@ -24,7 +24,9 @@ export const quizSchema: Schema = new Schema(
     metadata: {
       maxScore: Number,
       maxQuestions: Number,
-      maxPlayers: Number
+      maxPlayers: Number,
+      maxAttempts: Number,
+      minPlayers: Number
     },
     categoryId: {
       type: Schema.Types.ObjectId,
@@ -34,6 +36,7 @@ export const quizSchema: Schema = new Schema(
     code: {
       type: String,
     },
+    scheduled:Boolean,
     startDate: {
       type: Date,
     },
@@ -55,7 +58,7 @@ export const quizSchema: Schema = new Schema(
       required: true,
       default: 'public'
     },
-    poolAmount: Number,
+    poolAmount: { type: Number, default: 0 },
     isFreebie: Boolean
   },
   {
@@ -65,7 +68,7 @@ export const quizSchema: Schema = new Schema(
 
 
 quizSchema.pre<IQuizModel>('save', async function () {
-  this.code = Crypto.randomBytes(6).toString('hex');
+  this.code = Crypto.randomBytes(3).toString('hex');
 })
 
 quizSchema.methods.add = async function () {

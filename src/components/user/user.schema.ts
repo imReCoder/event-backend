@@ -23,8 +23,6 @@ export const UserSchema: Schema = new Schema(
     },
     lastName: {
       type: String,
-      minlength: 2,
-      required: true
     },
     userName: {
       type: String,
@@ -39,36 +37,14 @@ export const UserSchema: Schema = new Schema(
       type: String,
       minlength: 3,
     },
-    dateOfBirth: Date,
-    gender: {
-      type: String,
-      enum: ["male", "female", "other"],
-    },
-    religion: String,
-    pincode: String,
-    city: String,
-    state: String,
     avatar: {
       type: String,
       default: 'https://polbol-media.s3.ap-south-1.amazonaws.com/ic_user_dummy.jpg'
-    },
-    newsInterests: {
-      type: [String],
-      default: []
     },
     role: {
       type: String,
       enum: ["voter", "politician", "journalist", "admin"],
       required: true
-    },
-    party: {
-      type: ObjectID,
-      ref: "Party"
-    },
-    position: String,
-    mediaGroup: {
-      type: ObjectID,
-      ref: "MediaGroup"
     },
     tokens: [String],
     otp: Number,
@@ -88,21 +64,10 @@ export const UserSchema: Schema = new Schema(
       type: Boolean,
       default: false
     },
-    deviceType: {
-      type: String,
-      enum: ["ios", "android", "browser"],
-      default: "android"
-    },
-    deviceId: String,
     isPhoneVerified: {
       type: Boolean,
       default: false
-    },
-    referedCount: {
-      type: Number,
-      default: 0
-    },
-    referedBy: Schema.Types.ObjectId
+    }
   },
   {
     timestamps: true

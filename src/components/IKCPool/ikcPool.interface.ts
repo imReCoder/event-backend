@@ -1,10 +1,15 @@
 import { Document } from 'mongoose'
 
+export enum PoolStatus { PENDING = 'pending ', DEDUCTED = 'deducted' }
+
 export interface IPool {
-    user: string,
+    userId: string,
     roomId: string,
 
-    amount: string
+    amount: string,
+
+    status: string,
+    notify: boolean
 }
 
 export interface IPoolModel extends Document, IPool {

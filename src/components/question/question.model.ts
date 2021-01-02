@@ -85,16 +85,12 @@ export class QuestionModel {
     }
 
     private async randomQuestionsPicker(condition: any) {
-        let level = condition.level;
         let category = condition.category;
         let questionsCount = condition.questionsCount;
         return await Question.aggregate([
             {
                 $match: {
-                    $and: [
-                        { categoryId: category },
-                        { level: level }
-                    ]
+                    categoryId: category
                 }
             },
             {

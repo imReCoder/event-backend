@@ -5,7 +5,7 @@ export const sendMessage = (to: string, body: string) => {
   return axios.get('https://api.textlocal.in/send/', {
     params: {
       apiKey: textLocalConfig.apiKey,
-      sender: 'TALENT',
+      sender: 'YBOXMD',
       numbers: '91' + to,
       message: body
     }
