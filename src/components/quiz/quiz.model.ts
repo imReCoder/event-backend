@@ -14,7 +14,7 @@ import { PoolStatus } from "../IKCPool/ikcPool.interface";
 
 
 export class QuizModel {
-  private default: string = "title maxScore timeAlloted level category icon metadata visibility poolamount";
+  private default: string = "title maxScore timeAlloted level category icon metadata visibility poolamount startDate endDate isFreebie";
   private fieldsOfUser = "firstName lastName avatar userName createdAt email";
   private pruningFields: string = '_id creator createdAt updatedAt __v';
   private questionFields: string = "content level categoryId options points";
@@ -35,14 +35,15 @@ export class QuizModel {
     }
   }
 
-  async registerForQuiz(userId: string, cost: number, roomId: string) {
+  async registerForQuiz(userId: string, roomId: string) {
     try {
       if (isValidMongoId(userId.toString()) && isValidMongoId(roomId.toString())) {
         let exist = await ikcPool.findOne({ $and: [{ userId: userId }, { roomId: roomId }] });
         if (!exist) {
+          let quiz = await Quiz.findById(roomId);
           let body = {
             userId: userId,
-            cost: cost,
+            cost: quiz.poolAmount,
             roomId: roomId,
             status: PoolStatus.PENDING
           }
@@ -102,11 +103,18 @@ export class QuizModel {
     };
   }
 
-  async fetchByCategory(body: any, userId: string) {
-    let quizzes = await Quiz.find({ categoryId: body.categoryId }).select({ ...mongoDBProjectFields(this.default) }).lean();
-    let score = 10//await Wallet.getCategoryScore(userId, body.categoryId);
-    let maxLevelUnolocked = Result.unlockLevelCalculator(score);
-    return { quizzes: quizzes, score: score, maxLevelUnolocked: maxLevelUnolocked }
+  async fetchByActiveQuiz(body: any) {
+    let today = new Date();
+    let condition
+    if (body.type == 'classic') {
+      condition = {
+        $and: [{ startDate: { $gte: today } }, { isFreebie: false }]
+      }
+    } else {
+      condition = { isFreebie: true }
+    }
+    let quizzes = await this.fetchQuizByCondition(condition);
+    return { quizzes: quizzes }
   }
 
   private async verifyCode(quizId: string, code: string): Promise<{ proceed: boolean }> {
@@ -294,7 +302,7 @@ export class QuizModel {
         {
           $lookup: {
             from: 'users',
-            localField: '$ikcPools._id',
+            localField: '$ikcPools.userId',
             foreignField: '_id',
             as: 'user'
           }
@@ -314,7 +322,7 @@ export class QuizModel {
     }
   }
 
-  public async senndQuizNotification(body:any){
+  public async sendQuizStartNotification(body:any){
     body
   }
 

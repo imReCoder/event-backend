@@ -37,10 +37,10 @@ class QuizController {
     }
   };
 
-  public fetchAllQuizByCategory = async (req: Request, res: Response, next: NextFunction) => {
+  public fetchAllActiveQuiz = async (req: Request, res: Response, next: NextFunction) => {
     const responseHandler = new ResponseHandler();
     try {
-      responseHandler.reqRes(req, res).onFetch(msg.FETCH_ALL,await Quiz.fetchByCategory(req.query,req.userId as string)).send();
+      responseHandler.reqRes(req, res).onFetch(msg.FETCH_ALL,await Quiz.fetchByActiveQuiz(req.query)).send();
     } catch (e) {
       next(responseHandler.sendError(e));
     }
@@ -120,6 +120,15 @@ class QuizController {
     } catch (e) {
         next(responseHandler.sendError(e));
     }
+};
+
+public registerForQuiz = async (req: Request, res: Response, next: NextFunction) => {
+  const responseHandler = new ResponseHandler();
+  try {
+      responseHandler.reqRes(req, res).onCreate('Registeration Of Quiz Completed',await Quiz.registerForQuiz(req.userId as string, req.body.quizId)).send();
+  } catch (e) {
+      next(responseHandler.sendError(e));
+  }
 };
 
 }

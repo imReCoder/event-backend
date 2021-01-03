@@ -23,7 +23,7 @@ export default [
   {
     path: '/quiz/fetchQuiz',
     method: "get",
-    handler: [quizController.fetchAllQuizByCategory]
+    handler: [quizController.fetchAllActiveQuiz]
   },
   {
     path: '/quiz/start',
@@ -53,12 +53,17 @@ export default [
   {
     path: '/quiz/ruleBook',
     method: 'get',
-    escapeAuth:true,
+    escapeAuth: true,
     handler: [quizController.ruleBook]
   },
   {
     path: '/quiz/unlockLevel',
     method: 'get',
     handler: [quizController.unlockLevel]
+  },
+  {
+    path: '/quiz/register',
+    method: 'post',
+    handler: [quizController.registerForQuiz]
   },
 ];
