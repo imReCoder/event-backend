@@ -48,6 +48,7 @@ export class QuizModel {
             status: PoolStatus.PENDING
           }
           let pool = new ikcPool(body);
+          await Quiz.findByIdAndUpdate(roomId, {  $inc: { totalRegisterations: 1 }  })
           return await pool.save();
         } else {
           return { alreadyRegistered: true }

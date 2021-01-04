@@ -90,7 +90,7 @@ export class QuestionModel {
         return await Question.aggregate([
             {
                 $match: {
-                    categoryId: category
+                    categoryId: new ObjectID(category)
                 }
             },
             {

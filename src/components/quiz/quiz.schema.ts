@@ -36,7 +36,7 @@ export const quizSchema: Schema = new Schema(
     code: {
       type: String,
     },
-    scheduled:Boolean,
+    scheduled: Boolean,
     startDate: {
       type: Date,
     },
@@ -59,7 +59,12 @@ export const quizSchema: Schema = new Schema(
       default: 'public'
     },
     poolAmount: { type: Number, default: 0 },
-    isFreebie: Boolean
+    isFreebie: Boolean,
+    totalRegisterations: Number,
+    status:{
+      type:String,
+      enum:['active','dropped']
+    }
   },
   {
     timestamps: true

@@ -57,11 +57,6 @@ export default [
     handler: [quizController.ruleBook]
   },
   {
-    path: '/quiz/unlockLevel',
-    method: 'get',
-    handler: [quizController.unlockLevel]
-  },
-  {
     path: '/quiz/register',
     method: 'post',
     handler: [quizController.registerForQuiz]

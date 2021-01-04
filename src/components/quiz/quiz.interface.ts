@@ -22,7 +22,8 @@ export interface IQuiz {
   visibility: string,
 
   poolAmount: number,
-  scheduled:boolean
+  scheduled: boolean,
+  totalRegisterations: Number
 }
 
 export interface IQuizModel extends IQuiz, Document {

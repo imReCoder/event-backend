@@ -10,9 +10,9 @@ if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'developme
     let d2 = new Date(d1);
     d2.setMinutes(d2.getMinutes() + 30);
     const condition = {
-      hidden: false,
-      scheduled: true,
-      startDate: { $lte: d2 }
+     $and:[ {hidden: false},
+      {scheduled: true},
+      {startDate: { $and: [{ $lte: d2 }, { $gt: d1 }] }}]
     };
     console.log(condition);
 
