@@ -6,7 +6,7 @@ export const ResultSchema: Schema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'users'
     },
-    quizId: {
+    roomId: {
         type: Schema.Types.ObjectId,
         ref: 'Quiz'
     },
@@ -17,8 +17,6 @@ export const ResultSchema: Schema = new Schema({
         isCorrect: Boolean,
         pointScored: Number
     }],
-    maxLevelUnlockedAtStart: Number,
-    maxLevelUnlockedAtEnd: Number,
     countCorrect: { type: Number, default: 0 },
     accuracy: Number
 }, {

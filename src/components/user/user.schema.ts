@@ -43,7 +43,7 @@ export const UserSchema: Schema = new Schema(
     },
     role: {
       type: String,
-      enum: ["voter", "politician", "journalist", "admin"],
+      enum: ["user","admin"],
       required: true
     },
     tokens: [String],

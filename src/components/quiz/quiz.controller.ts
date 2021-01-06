@@ -104,24 +104,6 @@ class QuizController {
     }
   };
 
-  public unlockLevel = async (req: Request, res: Response, next: NextFunction) => {
-    const responseHandler = new ResponseHandler();
-    try {
-      responseHandler.reqRes(req, res).onCreate(msg.CREATED, await Quiz.unlockNextLevel(req.query,req.userId as string)).send();
-    } catch (e) {
-      next(responseHandler.sendError(e));
-    }
-  };
-
-  public takeHint = async (req: Request, res: Response, next: NextFunction) => {
-    const responseHandler = new ResponseHandler();
-    try {
-        responseHandler.reqRes(req, res).onFetch('Hint Taken',await Quiz.takeHint(req.query,req.userId as string)).send();
-    } catch (e) {
-        next(responseHandler.sendError(e));
-    }
-};
-
 public registerForQuiz = async (req: Request, res: Response, next: NextFunction) => {
   const responseHandler = new ResponseHandler();
   try {

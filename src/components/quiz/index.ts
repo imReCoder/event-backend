@@ -41,11 +41,6 @@ export default [
     handler: [resultController.timedOut]
   },
   {
-    path: '/quiz/hint',
-    method: 'get',
-    handler: [quizController.takeHint]
-  },
-  {
     path: '/quiz/end',
     method: 'get',
     handler: [resultController.end]

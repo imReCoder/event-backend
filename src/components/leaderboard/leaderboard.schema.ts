@@ -3,7 +3,7 @@ import { ILeaderBoardModel } from './leaderboard.interface';
 
 const leaderBoardSchema = new Schema({
     roomId: { type: Schema.Types.ObjectId, ref: 'QuizRoom', required: true },
-    result: {},
+    result: [],
     last_count: { type: Number, required: true }
 });
 

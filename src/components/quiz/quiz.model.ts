@@ -5,17 +5,17 @@ import { HTTP400Error } from "../../lib/utils/httpErrors";
 import { ObjectID } from "bson";
 import { mongoDBProjectFields } from "../../lib/utils";
 import Result from '../result/result.model'
-// import Wallet from '../wallet/wallet.model'
+import Wallet from '../IKCPool/ikcPool.model'
 import _ from 'lodash'
 import Question from '../question/question.model'
-import {ikcPool} from '../IKCPool/ikcPool.schema' 
+import { ikcPool } from '../IKCPool/ikcPool.schema'
 import { PoolStatus } from "../IKCPool/ikcPool.interface";
 
 
 
 export class QuizModel {
   private default: string = "title maxScore timeAlloted level category icon metadata visibility poolamount startDate endDate isFreebie";
-  private fieldsOfUser = "firstName lastName avatar userName createdAt email";
+  private fieldsOfUser = "firstName lastName avatar userName createdAt email _id";
   private pruningFields: string = '_id creator createdAt updatedAt __v';
   private questionFields: string = "content level categoryId options points";
   public rulePdf: string = 'https://drive.google.com/uc?export=view&id=1864Oc6WPcYQLq7wXyw4ZWIcN885_NVhU'
@@ -48,7 +48,8 @@ export class QuizModel {
             status: PoolStatus.PENDING
           }
           let pool = new ikcPool(body);
-          await Quiz.findByIdAndUpdate(roomId, {  $inc: { totalRegisterations: 1 }  })
+          await Quiz.findByIdAndUpdate(roomId, { $inc: { totalRegisterations: 1 } });
+          await this.deductIKC(userId,quiz.poolAmount);
           return await pool.save();
         } else {
           return { alreadyRegistered: true }
@@ -225,27 +226,22 @@ export class QuizModel {
 
   // End of optimized query
 
-  async start(userId: string, quizId: string , code? :string) {
+  async start(userId: string, quizId: string, code?: string) {
     if (isValidMongoId(userId.toString()) && isValidMongoId(quizId.toString())) {
-      // await Wallet.fetch(userId);
-      let codeVerification = await this.verifyCode(quizId , code)
+      let codeVerification = await this.verifyCode(quizId, code)
       let quiz = await Quiz.findById(quizId);
-      let scoreTillNow =100 //await Wallet.getCategoryScore(userId, quiz!.categoryId);
-      let maxLevelUnolocked = Result.unlockLevelCalculator(scoreTillNow);
-      if (quiz) {
+      if (quiz && codeVerification.proceed) {
         let questionsArray: any[] = []
         for (let condition of quiz.questions) {
           let data = await Question.fetchRandomQuestions(condition);
           questionsArray = _.concat(questionsArray, _.cloneDeep(data))
         }
-        let newScore : any = {
+        let newScore: any = {
           userId: userId,
           quizId: quizId,
           score: 0,
           questionsAnswered: [],
-          countCorrect: 0,
-          maxLevelUnlockedAtStart: maxLevelUnolocked,
-          maxLevelUnlockedAtEnd: 0
+          countCorrect: 0
         }
         let result = await Result.create(newScore);
         questionsArray = _.shuffle(questionsArray)
@@ -258,23 +254,16 @@ export class QuizModel {
     }
   }
 
-  public async takeHint(body: any, userId: string) {
-    try {
-      let response ={success:true} //await Wallet.takeHint(body.cost,userId);
-      if (response.success) {
-        let question = await Question.fetchAnswer(body.quesId);
-        console.log(question)
-        return { quesId: question._id, answer: question.answer, success: true }
-      } else {
-        return { success: false }
-      }
-    } catch (e) {
+  private async deductIKC(userId:string , cost:number){
+    try{
+      await Wallet.deductIKC(userId,cost)
+    }catch(e){
       throw new HTTP400Error(e);
     }
   }
-
   public async fetchUsersToNotify(condition: any) {
     try {
+      await Quiz.updateMany({ $expr: { $gte: ['totalRegisterations', 'metadata.minPlayers'] } }, { $set: { status: 'active' } });
       return Quiz.aggregate([
         {
           $match: condition
@@ -298,7 +287,7 @@ export class QuizModel {
           }
         },
         {
-          $unwind: { path: 'ikcPools'}
+          $unwind: { path: 'ikcPools' }
         },
         {
           $lookup: {
@@ -309,7 +298,7 @@ export class QuizModel {
           }
         },
         {
-          $unwind: { path: 'user'}
+          $unwind: { path: 'user' }
         },
         {
           $project: {
@@ -323,29 +312,9 @@ export class QuizModel {
     }
   }
 
-  public async sendQuizStartNotification(body:any){
+  public async sendQuizStartNotification(body: any) {
     body
   }
-
-  public async unlockNextLevel(body: any, userId: string) {
-    try {
-      if (isValidMongoId(body.categoryId)) {
-        let scoreTillNow =100 //await Wallet.getCategoryScore(userId, body.categoryId);
-        let points = Result.getNext500Multiple(scoreTillNow) - scoreTillNow;
-        let a = {
-          points: points,
-          categoryId: body.categoryId
-        }
-        return 100 //await Wallet.unlockLevel(a, userId);
-      } else {
-        throw new HTTP400Error('Invalid MongoDB Id')
-      }
-    } catch (e) {
-      console.log(e)
-      throw new HTTP400Error(e);
-    }
-  }
-
 }
 
 export default new QuizModel();
