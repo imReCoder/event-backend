@@ -1,6 +1,7 @@
 import { connect, connection } from "mongoose";
 import * as chalk from "chalk";
 import { MONGODB_URI } from "../utils/secrets";
+import { mongoUrl } from "../../config";
 //require database URL from properties file
 
 var connected = chalk.default.bold.cyan;
@@ -48,6 +49,7 @@ class Connection {
       useNewUrlParser: true,
       useCreateIndex: true,
       useFindAndModify: false,
+      useUnifiedTopology: true,
       // autoIndex: false, // Don't build indexes
       reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
       reconnectInterval: 500, // Reconnect every 500ms
@@ -62,4 +64,4 @@ class Connection {
 }
 
 
-export default new Connection(MONGODB_URI);
+export default new Connection(mongoUrl());

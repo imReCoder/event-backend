@@ -1,30 +1,49 @@
 import userController from "./user.controller";
 
-
+console.log(userController);
 export default [
-  {
-    path: "/user/search",
-    method: "get",
-    adminOnly: true,
-    handler: [userController.searchUsers]
-  },
   {
     path: "/user",
     method: "get",
-    adminOnly: true,
     handler: [userController.fetchAll]
-  },
-  {
-    path: "/user/dailyStats",
-    method: "get",
-    adminOnly: true,
-    handler: [userController.fetchDailyStats]
   },
   {
     path: "/user",
     method: "post",
-    escapeAuth: true,
     handler: [userController.create]
+  },
+  {
+    path: "/login",
+    method: "post",
+    escapeAuth:true,
+    handler:[userController.logIn]
+  },
+  {
+    path: "/signup",
+    method: "post",
+    escapeAuth:true,
+    handler:[userController.signUp]
+  },
+  {
+    path: "/follower/:id",
+    method: "post",
+    handler:[userController.addFollower]
+  },
+  {
+    path: "/following/:id",
+    method: "post",
+    handler:[userController.addFollowing]
+  },
+  {
+    path: "/followrequest/:id",
+    method: "post",
+    handler:[userController.addFolowRequest]
+  },
+  {
+    path: "/auth",
+    method: "post",
+    escapeAuth:true,
+    handler:[userController.loginViaSocialAccessToken]
   },
   {
     path: "/user/:id",
@@ -32,22 +51,38 @@ export default [
     handler: [userController.fetch]
   },
   {
-    path: "/user/:id/verify-otp",
-    method: "get",
-    escapeAuth: true,
-    handler: [userController.verifyOtp]
+    path: "/user/:id",
+    method: "patch",
+    handler: [userController.update]
   },
-  {
-    path: "/user/login",
-    method: "post",
-    escapeAuth: true,
-    handler: [userController.login]
-  },
-  {
-    path: "/user/adminLogin",
-    method: "post",
-    escapeAuth: true,
-    handler: [userController.adminLogin]
-  },
+//   {
+//     path: "/user/:id/photos",
+//     method: "get",
+//     handler: [userController.photos]
+//   }, {
+//     path: "/user/:id/liked",
+//     method: "get",
+//     handler: [userController.likes]
+//   }, {
+//     path: "/user/:id/follower",
+//     method: "get",
+//     handler: [userController.followers]
+//   },
+//   {
+//     path: "/user/:id/following",
+//     method: "get",
+//     handler: [userController.followings]
+//   },
+//   {
+//     path: "/user/is-available/userName",
+//     method: "get",
+//     escapeAuth: true,
+//     handler: [userController.isUsernameExist]
+//   },
+//   {
+//     path: "/user/search/on",
+//     method: "get",
+//     handler: [userController.searchByName]
+//   }
 ];
 

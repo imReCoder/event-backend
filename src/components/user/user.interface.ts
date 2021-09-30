@@ -1,15 +1,13 @@
-// you can move this interface at any common place
-// for now I wil stick with in components flow.
+// import { Interface } from "readline";
+
 export interface IUser {
-  phone: string;
-  tokens: string[];
-  role: string;
-  otp: number;
-  isPhoneVerified: boolean,
-  createdAt:Date,
-  firstName:string,
-  lastName:string,
-  userName:string,
-  
-  email:string
+    firstName: string;
+    lastName: string;
+    userName: string;
+    password: string;
+    email: string;
+    role: string;
+    dateOfBirth: Date;
+    followers: Array<string>;
+    following: Array<string>;
 }
