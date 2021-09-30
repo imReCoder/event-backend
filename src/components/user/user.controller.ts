@@ -54,6 +54,17 @@ class UserController {
     }
   };
 
+  public delete = async (req:Request,res:Response,next:NextFunction)=>{
+    const responseHandler = new ResponseHandler();
+
+    try {
+      await userModel.delete(req.params.id);
+      responseHandler.reqRes(req, res).onCreate(msg.UPDATED).send();
+    }catch(e){
+      next(responseHandler.sendError(e));
+    }
+  }
+
   
 
   
@@ -102,9 +113,9 @@ class UserController {
             facebookId: data.id
           }
         }
-        if (user) {
-          this.signUp(req, res, next,user);
-        }
+        // if (user) {
+        //   this.signUp(req, res, next,user);
+        // }
       }
     } catch (e) {
       next(responseHandler.sendError(e));
@@ -135,17 +146,12 @@ class UserController {
     }
   };
 
-  public signUp = async (req: Request, res: Response, next: NextFunction, user?: any) => {
+  public signUp = async (req: Request, res: Response, next: NextFunction) => {
     const responseHandler = new ResponseHandler();
     console.log("Hiii signup");
     try {
       let newUser:IUserModel;
-      if (user) {
-        newUser = await userModel.add(user);
-      } else {
-        console.log("Hiii");
         newUser = await userModel.add(req.body);
-      }
 
       this.createSendToken(req, res, next, newUser);
     } catch (e) {
@@ -177,7 +183,7 @@ class UserController {
       // 3> if eveything is ohkay send the token back
       if (user) {
         this.createSendToken(req, res, next, user);
-        responseHandler.reqRes(req, res).send();
+        // responseHandler.reqRes(req, res).send();
       } else {
         responseHandler.reqRes(req, res).send();
       }

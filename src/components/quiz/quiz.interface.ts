@@ -11,6 +11,7 @@ export interface IQuiz {
   creator: string;
   questions: { level: number, category: ICategoryModel['_id'], questionsCount: number }[];
   metadata: {
+    maxWinner: number;
     maxScore: number;
     maxQuestions: number;
     maxPlayers: number;

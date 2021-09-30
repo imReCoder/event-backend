@@ -56,4 +56,19 @@ export default [
     method: 'post',
     handler: [quizController.registerForQuiz]
   },
+  {
+    path:'/quiz/:id/participants',
+    method: 'get',
+    handler:[quizController.getParticipants]
+  },
+  {
+    path: '/quiz/:id/leaderboard',
+    method: 'get',
+    handler:[quizController.getLeaderboard]
+  },
+  {
+    path: '/quiz/:id/prize',
+    method: 'get',
+    handler:[quizController.getPrize]
+  }
 ];

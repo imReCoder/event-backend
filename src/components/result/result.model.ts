@@ -16,11 +16,13 @@ export class ScoreModel {
     }
 
     async update(body: any, userId: string): Promise<checkedAnswer> {
+        console.log("hii");
         if (isValidMongoId(body.resultId.toString()) && isValidMongoId(userId.toString())) {
             let score: checkedAnswer = await Question.pointsScored(body.quesId, body.answer);
+            console.log(score);
             let result = await Result.findById(new ObjectID(body.resultId));
-            let attempts = await Result.find({ userId: userId, roomId: result!.roomId }).count();
-            let quiz = await Quiz.findById(result!.roomId)
+            let attempts = await Result.find({ userId: userId, roomId: result.roomId }).count();
+            let quiz = await Quiz.findById(result.roomId)
             if (result && attempts != null && attempts != undefined && quiz) {
                 let pointsScored = Number(body.score)
                 let currScore = result.score | 0;

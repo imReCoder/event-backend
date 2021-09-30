@@ -26,9 +26,11 @@
         "watch-ts": "tsc -w"
     },
     "dependencies": {
+        "@types/bcrypt": "^5.0.0",
         "async": "^3.1.0",
         "aws-sdk": "^2.820.0",
         "axios": "^0.21.0",
+        "bcrypt": "^5.0.1",
         "bcrypt-nodejs": "^0.0.3",
         "body-parser": "^1.19.0",
         "compression": "^1.7.4",

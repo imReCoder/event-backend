@@ -5,8 +5,6 @@ import bcrypt from 'bcrypt';
 import { HTTP400Error, HTTP401Error } from "../../lib/utils/httpErrors";
 
 export class UserModel {
-
-
     public async fetchAll() {
         
         const data = User.find();
@@ -28,6 +26,10 @@ export class UserModel {
 
         return data;
     }
+
+  public async delete(id: string) {
+    await User.deleteOne({ _id: id });
+  }
 
   public async add(body : IUserModel) {
       body.role = 'user';

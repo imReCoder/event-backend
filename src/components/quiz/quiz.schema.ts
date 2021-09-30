@@ -22,6 +22,7 @@ export const quizSchema: Schema = new Schema(
       questionsCount: { type: Number }
     }],
     metadata: {
+      maxWinner:Number,
       maxScore: Number,
       maxQuestions: Number,
       maxPlayers: Number,

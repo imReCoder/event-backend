@@ -5,22 +5,22 @@ import {model} from 'mongoose';
 import {commonConfig} from '../../config';
 import {IUserModel} from '../../components/user/user.schema';
 
-
 interface IUserToken {
   user?: object
 }
 
 interface IUserTokenDetails {
+  // added id 
+  id?: string;
   _id?: string;
   name?: string;
   age?: number;
 }
-
 export const Authorization = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (req.header("Authorization")) {
       const token: string = req.header('Authorization') || "";
-      const data: IUserModel = await handleToken(token) ;
+      const data: IUserModel = await handleToken(token);
       if (data) {
         req.userId = data._id;
         req.role = data.role;
@@ -64,24 +64,25 @@ export const RoleAuthorization = (role:string) =>  async (req: Request, res: Res
   }
 };
 
-
-const handleToken= async (token: string)  : Promise<IUserModel> => {
+const handleToken = async (token: string) => {
   if (token) {
-    token = token.split(" ")[1];
+      token = token.split(" ")[1];
     const userData: IUserToken = await jwt.verify(token, commonConfig.jwtSecretKey) as object || {user: {}};
 
-    const userDetails: IUserTokenDetails = userData.user as object;
+      const userDetails: IUserTokenDetails = userData as object;
     const data: IUserModel | null = await model<IUserModel>('User').findOne({
-      _id: userDetails._id,
-      tokens: {$in: [token]}
+      _id: userDetails.id,
+    //   tokens: {$in: [token]}
     });
 
     if (data) {
       return data;
     } else {
-      throw new Error("You are not authorized user.........");
+      // tslint:disable-next-line: no-string-throw
+      throw "You are not authorized user.........";
     }
   } else {
-    throw new Error("You are not authorized user");
+    // tslint:disable-next-line: no-string-throw
+    throw "You are not authorized user";
   }
 };

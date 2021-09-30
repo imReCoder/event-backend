@@ -1,3 +1,4 @@
-import { handleBodyRequestParsing, allowCors, reqConsoleLogger,handleCompression, requestLimiter, useHelmet } from "./common.middleware";
+import { handleBodyRequestParsing, allowCors, reqConsoleLogger,handleCompression, useHelmet } from "./common.middleware";
 
-export default [useHelmet,handleBodyRequestParsing, allowCors, reqConsoleLogger, handleCompression, requestLimiter];
+export default [useHelmet,handleBodyRequestParsing, allowCors, reqConsoleLogger, handleCompression];
+// add request limiter ->pending

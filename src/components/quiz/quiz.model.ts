@@ -1,5 +1,7 @@
 import { Quiz } from "./quiz.schema";
+import mongoose from 'mongoose';
 import { IQuiz, IQuizModel } from "./quiz.interface";
+import  LeaderBoard  from "../leaderboard/leaderboard.model";
 import { isValidMongoId, pruneFields } from "../../lib/helpers";
 import { HTTP400Error } from "../../lib/utils/httpErrors";
 import { ObjectID } from "bson";
@@ -39,17 +41,18 @@ export class QuizModel {
     try {
       if (isValidMongoId(userId.toString()) && isValidMongoId(roomId.toString())) {
         let exist = await ikcPool.findOne({ $and: [{ userId: userId }, { roomId: roomId }] });
+        console.log(exist,userId);
         if (!exist) {
           let quiz = await Quiz.findById(roomId);
           let body = {
             userId: userId,
-            cost: quiz.poolAmount,
+            amount: quiz.poolAmount,
             roomId: roomId,
             status: PoolStatus.PENDING
           }
           let pool = new ikcPool(body);
           await Quiz.findByIdAndUpdate(roomId, { $inc: { totalRegisterations: 1 } });
-          await this.deductIKC(userId,quiz.poolAmount);
+          // await this.deductIKC(userId,quiz.poolAmount);
           return await pool.save();
         } else {
           return { alreadyRegistered: true }
@@ -226,11 +229,13 @@ export class QuizModel {
 
   // End of optimized query
 
+  // && codeVerification.proceed
   async start(userId: string, quizId: string, code?: string) {
     if (isValidMongoId(userId.toString()) && isValidMongoId(quizId.toString())) {
-      let codeVerification = await this.verifyCode(quizId, code)
+      // let codeVerification = await this.verifyCode(quizId, code)
       let quiz = await Quiz.findById(quizId);
-      if (quiz && codeVerification.proceed) {
+      console.log(quiz);
+      if (quiz ) {
         let questionsArray: any[] = []
         for (let condition of quiz.questions) {
           let data = await Question.fetchRandomQuestions(condition);
@@ -314,6 +319,42 @@ export class QuizModel {
 
   public async sendQuizStartNotification(body: any) {
     body
+  }
+
+  public async getParticipants(quizId: string) {
+    console.log(new mongoose.Types.ObjectId(quizId));
+    try {
+      console.log("participants");
+      // await Quiz.updateMany({ $expr: { $gte: ['totalRegisterations', 'metadata.minPlayers'] } }, { $set: { status: 'active' } });
+      const data = await ikcPool.aggregate([
+        {
+          $match: { roomId:new mongoose.Types.ObjectId(quizId) }
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'userId'
+          },
+        }
+      ])
+      return data;
+    } catch (e) {
+      throw new HTTP400Error(e);
+    }
+  };
+
+  public async getLeaderboard(roomId: string) {
+    const data = await LeaderBoard.getAwardResults(roomId);
+
+    return data;
+  };
+
+  public async getPrize(roomId: string) {
+    const data = await LeaderBoard.leaderboardAlgorithm(roomId);
+
+    return data;
   }
 }
 

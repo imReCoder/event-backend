@@ -104,15 +104,47 @@ class QuizController {
     }
   };
 
-public registerForQuiz = async (req: Request, res: Response, next: NextFunction) => {
-  const responseHandler = new ResponseHandler();
-  try {
-      responseHandler.reqRes(req, res).onCreate('Registeration Of Quiz Completed',await Quiz.registerForQuiz(req.userId as string, req.body.quizId)).send();
-  } catch (e) {
+  public registerForQuiz = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+    try {
+      responseHandler.reqRes(req, res).onCreate('Registeration Of Quiz Completed', await Quiz.registerForQuiz(req.userId as string, req.body.quizId)).send();
+    } catch (e) {
       next(responseHandler.sendError(e));
-  }
-};
+    }
+  };
 
-}
+  public getParticipants = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+
+    try {
+      responseHandler.reqRes(req, res).onFetch('Here are the participants', await Quiz.getParticipants(req.params.id)).send();
+    } catch (e) {
+      next(responseHandler.sendError(e));
+    }
+  };
+
+  public getLeaderboard = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+    try {
+      const data = await Quiz.getLeaderboard(req.params.id);
+
+      responseHandler.reqRes(req, res).onFetch("Leaderboard for the quiz", data).send();
+    } catch (e) {
+      next(responseHandler.sendError(e));
+    }
+  };
+
+  public getPrize = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+    try {
+      const data = await Quiz.getPrize(req.params.id);
+
+      responseHandler.reqRes(req, res).onFetch("Prize of winners", data).send();
+    } catch (e) {
+      next(responseHandler.sendError(e));
+    }
+  }
+
+};
 
 export default new QuizController;

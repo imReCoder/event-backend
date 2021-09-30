@@ -1,6 +1,5 @@
 import userController from "./user.controller";
 
-console.log(userController);
 export default [
   {
     path: "/user",
