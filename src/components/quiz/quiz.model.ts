@@ -238,7 +238,7 @@ export class QuizModel {
         }
         let newScore: any = {
           userId: userId,
-          quizId: quizId,
+          roomId: quizId,
           score: 0,
           questionsAnswered: [],
           countCorrect: 0

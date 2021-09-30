@@ -6,5 +6,10 @@ export interface IUser {
   role: string;
   otp: number;
   isPhoneVerified: boolean,
-  createdAt:Date
+  createdAt:Date,
+  firstName:string,
+  lastName:string,
+  userName:string,
+  
+  email:string
 }

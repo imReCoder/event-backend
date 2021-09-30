@@ -12,7 +12,7 @@ export class UserModel {
 
   private default: string = "firstName lastName userName phone email role avatar position dateOfBirth gender city state pincode newsInterests isVerified createdAt deleted isPhoneVerified";
   private fetchFields = `${this.default} position followers followings party mediaGroup `;
-  private pruningFields: string = '_id followers following tokens isVerified deviceType userName email phone role otp createdAt updatedAt __v';
+  private pruningFields: string = '_id followers following tokens isVerified userName deviceType phone role otp createdAt updatedAt __v isPhoneVerified';
 
   private fieldsOfUser = "firstName lastName avatar userName role isVerified";
 
@@ -86,7 +86,7 @@ export class UserModel {
   async fetchOnOtp(id: string, otp: number) {
     return await User.findOne({ _id: id, otp }, this.default);
   }
-  
+
   async fetchOnSocialCode(socialCode: string) {
     return User.findOne({
       $or: [
@@ -149,7 +149,7 @@ export class UserModel {
     if (!data) {
       let s = this.randomString(6);
       let body = {
-        role: 'voter',
+        role: 'user',
         firstName: `IKC10_${s}`,
         userName: `IKC10_${s}`,
         lastName: ``,
@@ -294,6 +294,26 @@ export class UserModel {
       lastTime,
       maxCount: paginationConfig.MAX_USERS
     };
+  }
+
+  async update(id: string, body: IUserModel) {
+    if (isValidMongoId(id)) {
+      if (await User.findOne({ _id: { $ne: id }, "userName": body.userName })) {
+        throw new HTTP400Error("UserName not available");
+      }
+      let s = this.randomString(6);
+      pruneFields(body, this.pruningFields);
+      if (body.firstName) {
+        body.userName = `${body.firstName}_${s}`
+      }
+      const data = await User.findByIdAndUpdate(id, body, { new: true, runValidators: true });
+      if (data) {
+        return data;
+      }
+      throw new HTTP400Error("Document Not Found");
+    } else {
+      throw new HTTP400Error("Not Valid MongoDB ID");
+    }
   }
 
 }

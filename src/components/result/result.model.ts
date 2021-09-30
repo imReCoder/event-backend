@@ -22,15 +22,16 @@ export class ScoreModel {
             let attempts = await Result.find({ userId: userId, roomId: result!.roomId }).count();
             let quiz = await Quiz.findById(result!.roomId)
             if (result && attempts != null && attempts != undefined && quiz) {
-                let pointsScored = body.score
+                let pointsScored = Number(body.score)
                 let currScore = result.score | 0;
-                result.score = currScore + pointsScored;
                 if (score.isCorrect) {
                     result.countCorrect += 1;
+                    result.score = currScore + pointsScored;
                 }
                 result.questionsAnswered.push({ quesId: body.quesId, answerMarked: body.answer, isCorrect: score.isCorrect, pointScored: pointsScored })
                 await result.save();
                 score.points = pointsScored
+                score.total = result.score;
                 return score;
             } else {
                 throw new HTTP400Error('No such Score ID')

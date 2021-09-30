@@ -10,7 +10,8 @@ export type checkedAnswer = {
     isCorrect: boolean,
     points: number,
     optionMarked: string,
-    correctOption: string
+    correctOption: string,
+    total?:number
 }
 
 export class QuestionModel {
