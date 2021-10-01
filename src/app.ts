@@ -5,6 +5,8 @@ import middleware from './lib/middleware/index'
 import routes from "./routes";
 import errorHandlersMiddleware from "./lib/middleware/errorHandlers.middleware";
 import dbConnection from "./lib/helpers/dbConnection";
+import { schedule } from 'node-cron';
+import quizModel from './components/quiz/quiz.model';
 /* Importing defaults */
 // import "./lib/services/cache";
 // Uncomment this when you are ready to use cache.
@@ -38,6 +40,13 @@ dbConnection.mongoConnection();
 
 // Different router required to initialize different apis call.
 const r1 = express.Router();
+
+// for recurrent jobs
+schedule('* * * * *', async () => {
+  console.log("Running job......");
+  await quizModel.updateQuiz();
+});
+
 
 app.use("/", applyRoutes(routes, r1)); // default api
 

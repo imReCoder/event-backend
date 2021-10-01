@@ -143,7 +143,21 @@ class QuizController {
     } catch (e) {
       next(responseHandler.sendError(e));
     }
-  }
+  };
+
+  public updateQuiz = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+
+    try {
+      const data = await Quiz.updateQuiz();
+
+      console.log(data);
+      responseHandler.reqRes(req, res).onFetch("Updating the quiz", data).send();
+      // return data;
+    } catch (e) {
+      responseHandler.sendError(e);
+    }
+  };
 
 };
 

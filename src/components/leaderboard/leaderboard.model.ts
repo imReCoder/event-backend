@@ -128,12 +128,12 @@ class LeaderBoardModel {
         try {
             const quiz = await Quiz.findById(roomId);
 
-            const numberofplayer: any = quiz.totalRegisterations;
+            const numberofplayer: any = quiz.totalRegistrations;
             const numberofwinner = quiz.metadata.maxWinner;
             const entryamount = quiz.poolAmount;
             const totalMoney = numberofplayer * entryamount;
-            const pollAmount = totalMoney - (0.05 * totalMoney);
-            const minPrize = 1.2 * entryamount;
+            const pollAmount = Math.floor(totalMoney - (0.05 * totalMoney));
+            const minPrize = Math.floor(1.2 * entryamount);
 
             console.log(numberofplayer, numberofwinner, entryamount);
             const a = 1.2;
@@ -144,7 +144,7 @@ class LeaderBoardModel {
             let prizes = [];
 
             for (let i = numberofwinner; i > 0; i--) {
-                const priceOfIthPlayer = ((maxPrize - minPrize) / Math.pow(i, a));
+                const priceOfIthPlayer = Math.floor(((maxPrize - minPrize) / Math.pow(i, a)));
                 totalDist += (priceOfIthPlayer + minPrize);
                 prizes[i - 1] = priceOfIthPlayer + minPrize;
                 maxPrize -= priceOfIthPlayer;
@@ -157,7 +157,7 @@ class LeaderBoardModel {
           
             for (let i = 1; i <= numberofwinner; i++) {
                 equilizer *= 2;
-                prizes[i - 1] += (remain / equilizer);
+                prizes[i - 1] += Math.floor(remain / equilizer);
                 totalDist += prizes[i - 1];
             }
         

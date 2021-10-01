@@ -34,6 +34,11 @@ export const quizSchema: Schema = new Schema(
       ref: 'Category',
       required: true
     },
+    lastDateToRegister: {
+      type: Date,
+      required: true,
+      default:Date.now()
+    },
     code: {
       type: String,
     },
@@ -61,11 +66,12 @@ export const quizSchema: Schema = new Schema(
     },
     poolAmount: { type: Number, default: 0 },
     isFreebie: Boolean,
-    totalRegisterations: Number,
+    totalRegistrations: Number,
     status:{
       type:String,
-      enum:['active','dropped']
-    }
+      enum: ['active', 'dropped'],
+    },
+    prizes:[Number]
   },
   {
     timestamps: true

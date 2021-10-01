@@ -5,7 +5,7 @@ let ikcPoolSchema = new Schema({
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     roomId: { type: Schema.Types.ObjectId, ref: 'quizRoom', required: true },
     amount: { type: Number, required: true },
-    status: { type: String, enum: ['pending', 'deducted'], required: true },
+    status: { type: String, enum: ['pending', 'deducted','dropped','cancelled','accepted'], required: true },
     notify: Boolean
 });
 

@@ -8,10 +8,11 @@ import { ObjectID } from "bson";
 import { mongoDBProjectFields } from "../../lib/utils";
 import Result from '../result/result.model'
 import Wallet from '../IKCPool/ikcPool.model'
-import _ from 'lodash'
+import _, { forEach, isObject } from 'lodash'
 import Question from '../question/question.model'
 import { ikcPool } from '../IKCPool/ikcPool.schema'
 import { PoolStatus } from "../IKCPool/ikcPool.interface";
+import { MetadataService } from "aws-sdk";
 
 
 
@@ -26,6 +27,7 @@ export class QuizModel {
     try {
       const temp = { ...body }
       temp.creator = userId;
+      temp.lastDateToRegister = new Date(temp.lastDateToApply);
       temp.questions = body.questions;
       temp.metadata = body.metadata;
       const q: IQuizModel = new Quiz(temp);
@@ -355,7 +357,48 @@ export class QuizModel {
     const data = await LeaderBoard.leaderboardAlgorithm(roomId);
 
     return data;
-  }
+  };
+
+  public async updateQuiz() {
+    
+    const data: any = await Quiz.find({ $and: [{ "lastDateToRegister": { $gte: Date.now() } }, { "status":{$ne:"active"} }] });
+    // console.log(...data);
+    // db.cards.aggregate([{$unwind: "$cards"}, {$match:{"cards._id" : "5a52f3a66f112b42b7439a20"}}] )
+    
+    data.forEach( async (element: any) => {
+      console.log(element._id);
+      await this.updateQuizStatus(element._id);
+      await this.updateIKCPool(element._id);
+    });
+  };
+
+  private async updateQuizStatus(quizId: string) {
+
+    const quiz = await Quiz.findById(quizId);
+
+    if (quiz.totalRegistrations >= quiz.metadata.minPlayers) {
+      const prize = await this.getPrize(quizId);
+      
+      await Quiz.findByIdAndUpdate(quizId, {
+        $set: { "status": "active","prizes":prize },
+        });
+    } else
+    {
+        await Quiz.findByIdAndUpdate(quizId, {
+          $set: { "status": "dropped" }
+        });
+    }
+
+    console.log(quiz);
+  };
+
+  private async updateIKCPool(quizId:string){
+    const IKCPoolPlayer = await ikcPool.updateMany({ roomId: quizId },
+      {
+        $set: { "status": PoolStatus.ACCEPTED }
+      });
+    console.log(IKCPoolPlayer);
+  };
 }
 
 export default new QuizModel();

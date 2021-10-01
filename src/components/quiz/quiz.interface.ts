@@ -15,7 +15,9 @@ export interface IQuiz {
     maxScore: number;
     maxQuestions: number;
     maxPlayers: number;
+    minPlayers: number;
   }
+  lastDateToRegister:Date,
   categoryId: string,
   icon: string,
   level: number,
@@ -24,7 +26,9 @@ export interface IQuiz {
 
   poolAmount: number,
   scheduled: boolean,
-  totalRegisterations: Number
+  totalRegistrations: Number,
+
+  prizes:Array<number>
 }
 
 export interface IQuizModel extends IQuiz, Document {
