@@ -7,6 +7,9 @@ export interface IUser {
     password: string;
     email: string;
     role: string;
+    phone: string;
+    otp: number;
+    isVerified: boolean;
     dateOfBirth: Date;
     followers: Array<string>;
     following: Array<string>;

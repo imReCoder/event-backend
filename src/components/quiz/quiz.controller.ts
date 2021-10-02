@@ -159,6 +159,19 @@ class QuizController {
     }
   };
 
+  public checkQuiz = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+    try {
+      const data = await Quiz.checkQuiz(req.body.quizId);
+
+      if (!data.isFreebie) {
+        responseHandler.reqRes(req, res).onFetch("This quiz is not free", data).send();
+      }
+    } catch (e) {
+      responseHandler.sendError(e);
+    }
+  }
+
 };
 
 export default new QuizController;

@@ -218,6 +218,20 @@ class UserController {
       responseHandler.sendError(e);
     }
   };
+
+  public isVerified = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+    try {
+      const data = await userModel.isUserVerified(req.userId);
+      
+      if (!data.proceed) {
+        responseHandler.reqRes(req, res).onFetch("User is not verified", data).send();
+      }
+      
+    } catch (e) {
+      responseHandler.sendError(e);
+    }
+  }
 }
 
 export default new UserController();

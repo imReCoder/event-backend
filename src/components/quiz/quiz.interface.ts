@@ -28,7 +28,9 @@ export interface IQuiz {
   scheduled: boolean,
   totalRegistrations: Number,
 
-  prizes:Array<number>
+  prizes: Array<number>,
+  
+  isFreebie:boolean,
 }
 
 export interface IQuizModel extends IQuiz, Document {

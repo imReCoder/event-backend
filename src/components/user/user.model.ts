@@ -134,6 +134,16 @@ export class UserModel {
 
     return data;
   };
+
+  public async isUserVerified(id: string) {
+    const user = await User.findById(id);
+
+    if (user.isVerified) {
+      return { proceed: true };
+    }
+
+    return { proceed: false };
+  };
 }
 
 export default new UserModel();

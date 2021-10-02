@@ -43,6 +43,14 @@ export const UserSchema: Schema = new Schema(
     facebookId: {
       type:String
     },
+    phone: {
+      type:String
+    },
+    otp: Number,
+    isVerified: {
+      type: Boolean,
+      default:false
+    }
   },
   {
     timestamps: true

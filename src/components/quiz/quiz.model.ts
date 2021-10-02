@@ -399,6 +399,15 @@ export class QuizModel {
       });
     console.log(IKCPoolPlayer);
   };
-}
 
+  public async checkQuiz(body: any) {
+    const quiz = await Quiz.findById(body.quizId);
+
+    if (!quiz.isFreebie) {
+      return {isFreebie:false}
+    }
+
+    return {isFreebie:true}
+  };
+}
 export default new QuizModel();

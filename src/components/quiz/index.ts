@@ -1,6 +1,6 @@
 import quizController from "./quiz.controller";
 import resultController from "../result/result.controller"
-
+import userController from "../user/user.controller";
 export default [
   {
     path: "/quiz/create",
@@ -54,7 +54,7 @@ export default [
   {
     path: '/quiz/register',
     method: 'post',
-    handler: [quizController.registerForQuiz]
+    handler: [userController.isVerified,quizController.checkQuiz,quizController.registerForQuiz]
   },
   {
     path:'/quiz/:id/participants',
