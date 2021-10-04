@@ -225,13 +225,15 @@ class UserController {
       const data = await userModel.isUserVerified(req.userId);
       
       if (!data.proceed) {
-        responseHandler.reqRes(req, res).onFetch("User is not verified", data).send();
+        return responseHandler.reqRes(req, res).onFetch("User is not verified", data).send();
+      } else {
+        req.body.phone = data.phone;
       }
-      
+      next();
     } catch (e) {
-      responseHandler.sendError(e);
+      next(responseHandler.sendError(e));
     }
-  }
+  };
 }
 
 export default new UserController();

@@ -129,7 +129,7 @@ class LeaderBoardModel {
             const quiz = await Quiz.findById(roomId);
 
             const numberofplayer: any = quiz.totalRegistrations;
-            const numberofwinner = quiz.metadata.maxWinner;
+            const numberofwinner = quiz.metadata.minPlayers;
             const entryamount = quiz.poolAmount;
             const totalMoney = numberofplayer * entryamount;
             const pollAmount = Math.floor(totalMoney - (0.05 * totalMoney));
@@ -165,7 +165,7 @@ class LeaderBoardModel {
             
             return prizes;
         } catch (e) {
-            throw Error();
+            throw Error(e);
         }
     }
 }

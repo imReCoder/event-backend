@@ -54,7 +54,7 @@ app.use("/", applyRoutes(routes, r1)); // default api
 | API VERSIONS CONFIGURATION [END]
 |---------------------------------------*/
 
-// applyMiddleware(errorHandlersMiddleware, app);
+applyMiddleware(errorHandlersMiddleware, app);
 
 
 // Exporting app

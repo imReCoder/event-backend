@@ -13,7 +13,10 @@ import Question from '../question/question.model'
 import { ikcPool } from '../IKCPool/ikcPool.schema'
 import { PoolStatus } from "../IKCPool/ikcPool.interface";
 import { MetadataService } from "aws-sdk";
-
+import { ITransaction, ITransactionModel } from "../transactions/transaction.interface";
+import { Transaction} from "../transactions/transaction.schema";
+import axios from 'axios';
+import transactionModel from "../transactions/transaction.model";
 
 
 export class QuizModel {
@@ -30,6 +33,8 @@ export class QuizModel {
       temp.lastDateToRegister = new Date(temp.lastDateToApply);
       temp.questions = body.questions;
       temp.metadata = body.metadata;
+      temp.prizes = [];
+      temp.totalRegistrations = 0;
       const q: IQuizModel = new Quiz(temp);
       const data = await q.add();
       return data.populate('creator', this.fieldsOfUser).execPopulate();
@@ -53,7 +58,7 @@ export class QuizModel {
             status: PoolStatus.PENDING
           }
           let pool = new ikcPool(body);
-          await Quiz.findByIdAndUpdate(roomId, { $inc: { totalRegisterations: 1 } });
+          await Quiz.findByIdAndUpdate(roomId, { $inc: { "totalRegistrations": 1 } });
           // await this.deductIKC(userId,quiz.poolAmount);
           return await pool.save();
         } else {
@@ -360,16 +365,23 @@ export class QuizModel {
   };
 
   public async updateQuiz() {
-    
-    const data: any = await Quiz.find({ $and: [{ "lastDateToRegister": { $gte: Date.now() } }, { "status":{$ne:"active"} }] });
+    let session = await mongoose.connection.startSession();
+    try{
+      const data: any = await Quiz.find({ $and: [{ "lastDateToRegister": { $lte: Date.now() } }, { "status":{$ne:"active"} }] });
     // console.log(...data);
     // db.cards.aggregate([{$unwind: "$cards"}, {$match:{"cards._id" : "5a52f3a66f112b42b7439a20"}}] )
     
-    data.forEach( async (element: any) => {
-      console.log(element._id);
-      await this.updateQuizStatus(element._id);
-      await this.updateIKCPool(element._id);
-    });
+      data.forEach( async (element: any) => {
+        console.log(element._id);
+        await this.updateQuizStatus(element._id);
+        await this.updateIKCPool(element._id);
+      });
+    } catch (e) {
+      console.log(e);
+      throw new HTTP400Error(e);
+    } finally {
+      await session.endSession();
+    }
   };
 
   private async updateQuizStatus(quizId: string) {
@@ -393,21 +405,97 @@ export class QuizModel {
   };
 
   private async updateIKCPool(quizId:string){
-    const IKCPoolPlayer = await ikcPool.updateMany({ roomId: quizId },
-      {
-        $set: { "status": PoolStatus.ACCEPTED }
-      });
-    console.log(IKCPoolPlayer);
+
+    const quiz = await Quiz.findById(quizId);
+    if(quiz.status == 'active'){
+      const IKCPoolPlayer = await ikcPool.updateMany({ roomId: quizId },
+        {
+          $set: { "status": PoolStatus.ACCEPTED }
+        });
+        console.log(IKCPoolPlayer);
+    }
   };
 
-  public async checkQuiz(body: any) {
-    const quiz = await Quiz.findById(body.quizId);
+  public async checkQuiz(quizId: any) {
+    const quiz = await Quiz.findById(quizId);
 
     if (!quiz.isFreebie) {
-      return {isFreebie:false}
+      return {poolAmount:quiz.poolAmount,isFreebie:false}
     }
 
     return {isFreebie:true}
   };
+
+  public async payment(paymentBody:any,apiKey:string) {
+    try {
+      apiKey = "kxg7++wl/jcO5taRY8qfG1wdV+0TUiYQB8NcY9MqjkM="
+      console.log("Making payment from wallet");
+      const res = await axios({
+        method: 'POST',
+        url: `http://localhost:8000/wallet/addToMasterWallet?apiKey=${apiKey}`,
+        data: {
+          ...paymentBody
+        }
+      });
+
+      return res;
+    } catch (e) {
+      throw Error(e);
+      }
+  };
+
+  public async initiateTransaction(body:any) {
+    try {
+      const transaction = await transactionModel.create(body);
+
+      return transaction;
+    } catch (e) {
+      throw Error(e);
+    }
+  };
+
+  public async transactions(userId:string,body:any) {
+    try {
+      const transactionBody = {
+        userId,
+        amount: body.amount,
+        type:`${body.type}`,
+        description: `${body.description}`,
+        metadata:{
+          type:`${body.metadata.type}`,
+          description:`${body.metadata.description}`
+        },
+        status:"PENDING"
+      }
+      console.log("Saving transaction...");
+      const res = await this.initiateTransaction(transactionBody);
+
+      return res;
+    } catch (e) {
+      throw Error(e);
+    }
+  };
+
+  public async distributePriceMoney(quizId:string){
+    try{
+      const quiz = await Quiz.findById(quizId);
+      if( quiz.status === 'active' && quiz.prizes.length > 0 ){
+        const leaderboard = await LeaderBoard.getAwardResults(quizId);
+
+        if( leaderboard.result > 0 ){
+            const res = await axios({
+          method:"POST",
+          url:"http://localhost:8000/addToWallet",
+          data:{
+            ...leaderboard
+          }
+      });
+            return res;
+      }
+      };
+    }catch(e){
+      throw Error(e);
+    }
+  }
 }
 export default new QuizModel();

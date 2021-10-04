@@ -139,7 +139,7 @@ export class UserModel {
     const user = await User.findById(id);
 
     if (user.isVerified) {
-      return { proceed: true };
+      return { proceed: true,phone:user.phone };
     }
 
     return { proceed: false };

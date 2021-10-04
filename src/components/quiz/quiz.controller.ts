@@ -164,13 +164,53 @@ class QuizController {
     try {
       const data = await Quiz.checkQuiz(req.body.quizId);
 
+      console.log(data,req.body);
       if (!data.isFreebie) {
-        responseHandler.reqRes(req, res).onFetch("This quiz is not free", data).send();
+        try {
+          req.body.amount = data.poolAmount;
+          const transactiondetails = await Quiz.transactions(req.userId, req.body);
+          console.log(transactiondetails);
+          if (transactiondetails._id) {
+
+            const paymentBody = {
+              phone: req.body.phone,
+              amount:transactiondetails.amount,
+              userId:transactiondetails.userId,
+              isFreebie:false,
+              description:transactiondetails.metadata.description,
+              transactionId:transactiondetails._id
+            }
+            const walletTransaction = await Quiz.payment(paymentBody,req.query.apiKey);
+            
+            if(walletTransaction.data.status){
+              next();
+            }else 
+            {
+              throw Error("Wallet transaction failed");
+            }
+          }
+        } catch (e) {
+          next(responseHandler.sendError(e));
+        }
+      }else {
+        next();
       }
     } catch (e) {
-      responseHandler.sendError(e);
+      next(responseHandler.sendError(e));
     }
-  }
+  };
+
+
+  public transaction = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+    try {
+      console.log("In here");
+      const transactionBody = await Quiz.initiateTransaction(req.body);
+      req.body.transactionBody = transactionBody;
+    } catch (e) {
+      next(responseHandler.sendError(e));
+    }
+  };
 
 };
 

@@ -31,6 +31,8 @@ export interface IQuiz {
   prizes: Array<number>,
   
   isFreebie:boolean,
+
+  status:string,
 }
 
 export interface IQuizModel extends IQuiz, Document {
