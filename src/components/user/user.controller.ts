@@ -150,8 +150,7 @@ class UserController {
     const responseHandler = new ResponseHandler();
     console.log("Hiii signup");
     try {
-      let newUser:IUserModel;
-        newUser = await userModel.add(req.body);
+        const newUser:IUserModel = await userModel.add(req.body);
 
       this.createSendToken(req, res, next, newUser);
     } catch (e) {
@@ -230,6 +229,27 @@ class UserController {
         req.body.phone = data.phone;
       }
       next();
+    } catch (e) {
+      next(responseHandler.sendError(e));
+    }
+  };
+
+  public verifyUser = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+    try {
+      const otp = await userModel.genrateOTP(req.userId);
+
+      if (otp.proceed) {
+        const result = await userModel.verifyUser(otp.otp.toString(), req.userId);
+
+        if (result.proceed) {
+          responseHandler.reqRes(req, res).onCreate("User Verified", res).send();
+        } else {
+          throw Error("User Not Verified");
+        }
+      } else {
+        throw new Error("OTP not found");
+      }
     } catch (e) {
       next(responseHandler.sendError(e));
     }

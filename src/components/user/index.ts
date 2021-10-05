@@ -54,6 +54,11 @@ export default [
     method: "patch",
     handler: [userController.update]
   },
+  {
+    path: "/user/verifyUser",
+    method: "post",
+    handler:[userController.verifyUser]
+  }
 //   {
 //     path: "/user/:id/photos",
 //     method: "get",

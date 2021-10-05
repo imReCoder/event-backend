@@ -71,7 +71,8 @@ export const quizSchema: Schema = new Schema(
       type:String,
       enum: ['active', 'dropped'],
     },
-    prizes:[Number]
+    prizes: [Number],
+    winners: [Schema.Types.ObjectId]
   },
   {
     timestamps: true

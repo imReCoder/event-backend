@@ -35,7 +35,7 @@ export class QuestionModel {
             temp.options = body.options
             const newQues: IQuestionModel = new Question(temp);
             newQues.answer = newQues.options[Number(newQues.answer) - 1]._id;
-            const data = await newQues.add()
+            const data = await newQues.add();
             return data.populate('creator', this.fieldsOfUser).execPopulate();
         }catch(e){
             console.log(e);

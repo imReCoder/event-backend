@@ -1,8 +1,11 @@
+import {generateToken, imageUrl, isValidMongoId, otpGenerator} from "../../lib/helpers";
 import { User } from "./user.schema";
 import { IUserModel } from "./user.schema";
 import socialAuth from "./../../lib/middleware/socialAuth";
 import bcrypt from 'bcrypt';
+import { sendMessage } from "./../../lib/services/textlocal";
 import { HTTP400Error, HTTP401Error } from "../../lib/utils/httpErrors";
+import user from ".";
 
 export class UserModel {
     public async fetchAll() {
@@ -134,6 +137,34 @@ export class UserModel {
 
     return data;
   };
+
+  public async genrateOTP(id: string) {
+    const user = await User.findById(id);
+    const otp = otpGenerator();
+
+    const res = await sendMessage(user.phone, otp.toString());
+    
+    if (res.proceed && otp != null) {
+      await User.findByIdAndUpdate(id, {
+        $set: { "otp": otp }
+      },
+        { new: true });
+
+      return { proceed:true,otp };
+    };
+
+    return {proceed:false};
+  };
+
+  public async verifyUser(otp: string,id:string) {
+    const user = await User.findById(id);
+
+    if (user.otp && (user.otp.toString() == otp.toString())) {
+      return { proceed: true };
+    }
+
+    return { proceed: false };
+  }
 
   public async isUserVerified(id: string) {
     const user = await User.findById(id);

@@ -2,6 +2,7 @@ import axios from 'axios';
 import {textLocalConfig} from "../../config";
 
 export const sendMessage = (to: string, body: string) => {
+  console.log(to, body,textLocalConfig.apiKey);
   return axios.get('https://api.textlocal.in/send/', {
     params: {
       apiKey: textLocalConfig.apiKey,

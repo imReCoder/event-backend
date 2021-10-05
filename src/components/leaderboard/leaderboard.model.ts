@@ -47,22 +47,7 @@ class LeaderBoardModel {
             {
                 $match: { roomId: new mongoose.Types.ObjectId(roomId) }
             },
-            {
-                $lookup: {
-                    from: 'quizrooms',
-                    localField: 'roomId',
-                    foreignField:'_id',
-                    as:'roomId'
-                }
-            },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'userId',
-                    foreignfield: '_id',
-                    as:'userId'
-                }
-            },
+            
             {
                  $sort: {score:-1} 
             }

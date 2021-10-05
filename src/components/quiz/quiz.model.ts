@@ -257,7 +257,7 @@ export class QuizModel {
         }
         let result = await Result.create(newScore);
         questionsArray = _.shuffle(questionsArray)
-        return { resultId: result._id, questions: questionsArray };
+        return { resultId: result._id, questions: questionsArray,length:questionsArray.length };
       } else {
         throw new HTTP400Error("Not a valid Quiz ID");
       }
@@ -365,7 +365,7 @@ export class QuizModel {
   };
 
   public async updateQuiz() {
-    let session = await mongoose.connection.startSession();
+    // let session = await mongoose.connection.startSession();
     try{
       const data: any = await Quiz.find({ $and: [{ "lastDateToRegister": { $lte: Date.now() } }, { "status":{$ne:"active"} }] });
     // console.log(...data);
@@ -374,19 +374,22 @@ export class QuizModel {
       data.forEach( async (element: any) => {
         console.log(element._id);
         await this.updateQuizStatus(element._id);
-        await this.updateIKCPool(element._id);
+        await this.updateQuizWinners(element._id);
+        // await this.updateIKCPool(element._id);
       });
     } catch (e) {
       console.log(e);
       throw new HTTP400Error(e);
     } finally {
-      await session.endSession();
+      // await session.endSession();
     }
   };
 
   private async updateQuizStatus(quizId: string) {
 
     const quiz = await Quiz.findById(quizId);
+
+    // const IKCPlayers = await ikcPool.find({ $and: [{ roomId: quizId },{status:"deducted"}] });
 
     if (quiz.totalRegistrations >= quiz.metadata.minPlayers) {
       const prize = await this.getPrize(quizId);
@@ -404,17 +407,27 @@ export class QuizModel {
     console.log(quiz);
   };
 
-  private async updateIKCPool(quizId:string){
-
+  private async updateQuizWinners(quizId: string) {
     const quiz = await Quiz.findById(quizId);
-    if(quiz.status == 'active'){
-      const IKCPoolPlayer = await ikcPool.updateMany({ roomId: quizId },
-        {
-          $set: { "status": PoolStatus.ACCEPTED }
-        });
-        console.log(IKCPoolPlayer);
+    
+    if (quiz.prizes.length > 0) {
+      const leaderboard = await LeaderBoard.getAwardResults(quizId);
+
+      
     }
-  };
+  }
+
+  // private async updateIKCPool(quizId:string){
+
+  //   const quiz = await Quiz.findById(quizId);
+  //   if(quiz.status == 'active'){
+  //     const IKCPoolPlayer = await ikcPool.updateMany({ roomId: quizId },
+  //       {
+  //         $set: { "status": PoolStatus.PENDING }
+  //       });
+  //       console.log(IKCPoolPlayer);
+  //   }
+  // };
 
   public async checkQuiz(quizId: any) {
     const quiz = await Quiz.findById(quizId);
@@ -437,6 +450,35 @@ export class QuizModel {
           ...paymentBody
         }
       });
+
+
+      if (res.data.status) {
+        const transaction = await Transaction.findOneAndUpdate({ userId: paymentBody.userId }, {
+          $set:{"status":"TXN_SUCCESS"}
+        }, {
+          new:true
+        });
+
+        if (transaction.status == "TXN_SUCCESS") {
+          const IKCPlayer = await ikcPool.findOneAndUpdate({ userId: paymentBody.userId }, {
+            $set:{"status":"deducted"}
+          },
+            {
+            new :true
+            });
+          
+          if (IKCPlayer.status != "deducted") {
+            throw Error(`IKCPool not deducted for ${paymentBody.userId}`);
+          }
+        } else
+        {
+          throw Error(`Transaction status not updated for user ${paymentBody.userId}`);
+          }
+
+      } else
+      {
+        throw Error(`Making payment from wallet failed for user ${paymentBody.userId}`);
+        }
 
       return res;
     } catch (e) {
