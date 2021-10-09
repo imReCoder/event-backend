@@ -113,9 +113,11 @@ class UserController {
             facebookId: data.id
           }
         }
-        // if (user) {
-        //   this.signUp(req, res, next,user);
-        // }
+        
+        if (user) {
+          req.body.user = user;
+          this.signUp(req, res, next);
+        }
       }
     } catch (e) {
       next(responseHandler.sendError(e));
@@ -150,7 +152,14 @@ class UserController {
     const responseHandler = new ResponseHandler();
     console.log("Hiii signup");
     try {
-        const newUser:IUserModel = await userModel.add(req.body);
+      let newUser:IUserModel
+      if (req.body.user) {
+        newUser = await userModel.add(req.body.user);
+      }else 
+      {
+        newUser = await userModel.add(req.body);
+      }
+      
 
       this.createSendToken(req, res, next, newUser);
     } catch (e) {

@@ -2,7 +2,7 @@ import { Document } from 'mongoose'
 
 export interface ILeaderBoard {
     roomId: string,
-    result: {},
+    result: [],
     last_count: number
 }
 

@@ -45,6 +45,7 @@
         "express-validator": "^6.2.0",
         "fbgraph": "^1.4.4",
         "helmet": "^4.2.0",
+        "http": "0.0.1-security",
         "jsonwebtoken": "^8.5.1",
         "lodash": "^4.17.19",
         "moment-timezone": "^0.5.32",
@@ -56,7 +57,9 @@
         "passport": "^0.4.0",
         "passport-facebook": "^3.0.0",
         "passport-local": "^1.0.0",
+        "socket.io": "^4.2.0",
         "tsc-watch": "^4.2.9",
+        "typescript": "^4.0.5",
         "winston": "^3.2.1"
     },
     "devDependencies": {
@@ -103,7 +106,6 @@
         "shelljs": "^0.8.3",
         "supertest": "^4.0.2",
         "ts-jest": "^24.1.0",
-        "ts-node": "^8.4.1",
-        "typescript": "^3.6.3"
+        "ts-node": "^8.4.1"
     }
 }

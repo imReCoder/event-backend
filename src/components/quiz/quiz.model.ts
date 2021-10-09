@@ -518,23 +518,40 @@ export class QuizModel {
     }
   };
 
-  public async distributePriceMoney(quizId:string){
-    try{
-      const quiz = await Quiz.findById(quizId);
-      if( quiz.status === 'active' && quiz.prizes.length > 0 ){
-        const leaderboard = await LeaderBoard.getAwardResults(quizId);
+  public async distributePriceMoney(){
+    try {
+      const apiKey = "kxg7++wl/jcO5taRY8qfG1wdV+0TUiYQB8NcY9MqjkM="
+      const quiz: any = await Quiz.find({ $and: [{ "endDate": { $lte: Date.now() } }, { "status":{$eq:"active"} }] });
+      // console.log(quiz);
 
-        if( leaderboard.result > 0 ){
+      quiz.forEach(async (element:any) => {
+      if (element.status === 'active' && element.prizes.length > 0) {
+        const leaderboard = await LeaderBoard.getAwardResults(element._id);
+        // console.log(leaderboard);
+        if (leaderboard.result.length > 0) {
+          const roomId = leaderboard.roomId._id;
+          leaderboard.result.forEach(async (resultElement: any,index: number) => {
+            
+            const transactionBody = {
+              prize:element.prizes[index],
+              score: resultElement.score,
+              userId: resultElement.userId,
+              roomId
+            };
+          
             const res = await axios({
-          method:"POST",
-          url:"http://localhost:8000/addToWallet",
-          data:{
-            ...leaderboard
-          }
-      });
-            return res;
+              method: "POST",
+              url: `http://localhost:8000/wallet/addToWallet?apiKey=${apiKey}`,
+              data: {
+                ...transactionBody
+              }
+            });
+
+            console.log(res.data.status);
+          });
+        }
       }
-      };
+      });
     }catch(e){
       throw Error(e);
     }

@@ -24,6 +24,10 @@ export interface IQuiz {
   code: string,
   visibility: string,
 
+  startDate: any,
+  
+  endDate:any,
+
   poolAmount: number,
   scheduled: boolean,
   totalRegistrations: Number,

@@ -19,6 +19,12 @@ class LeaderBoardModel {
 
     private FieldsofQuizRoom = "title maxScore timeAlloted level category icon metadata visibility poolamount startDate endDate isFreebie"
 
+    private leaderboardFields:any = {
+        "result.score": 1,
+        "resultId": 1,
+        "clientId": 1,
+        "roomId":1,
+    }
     private async buildResultTemplate(roomId: string) {
         return {
             roomId: roomId,
@@ -54,8 +60,8 @@ class LeaderBoardModel {
         ]);
 
         return results;
-    }
-
+    };
+    
     async getAwardResults(roomId: string) {
 
         const data = await LeaderBoard.findOne({
@@ -152,7 +158,7 @@ class LeaderBoardModel {
         } catch (e) {
             throw Error(e);
         }
-    }
+    };
 }
 
 export default new LeaderBoardModel();

@@ -1,5 +1,9 @@
-import {config} from "dotenv";
-import * as http from "http";
+import { config } from "dotenv";
+import ioserver, { Socket } from 'socket.io';
+import { Server } from "socket.io";
+import { createServer } from "http";
+// import ioclient from 'socket.io-client';
+// import * as http from "http";
 import { log } from "util";
 
 // Initializing the dot env file very early of this project to use every where
@@ -12,8 +16,14 @@ import { app } from "./app";
 const Port:number = process.env.PORT ? + process.env.PORT : 8000;
 
 // // Create http server [non ssl]
-// const server = http.createServer(app);
+const server = createServer(app);
 
-const server = app.listen(Port, () => {
+let io = new Server(server);
+
+io.on("connection", (socket: Socket)=> {
+  console.log("a user connected");
+});
+
+server.listen(Port, () => {
     console.log(`Listening to port ${Port}`);
 });
