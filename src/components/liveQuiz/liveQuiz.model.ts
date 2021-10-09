@@ -1,5 +1,6 @@
 import { Quiz } from "./../quiz/quiz.schema";
 import mongoose from 'mongoose';
+import { Request as req } from "express";
 import { IQuiz, IQuizModel } from "./../quiz/quiz.interface";
 import  LeaderBoard  from "../leaderboard/leaderboard.model";
 import { isValidMongoId, pruneFields } from "../../lib/helpers";
@@ -24,16 +25,18 @@ import resultModel from "../result/result.model";
 
 export class LiveQuizModel {
 
-    public async add(quizId:any) {
+    private questionFields: string = "content level categoryId options points";
+    public async add(socketId:any,userId:any,quizId:any) {
         try {
             const quiz = await Quiz.findById(quizId);
-
-            if (quiz.startDate > Date.now()) {
+            // just for testing
+            if (quiz.startDate < Date.now()) {
+                userId = mongoose.Types.ObjectId(userId);
                 const liveQuiz = await LiveQuiz.findOne({ roomId: quizId });
                 if (liveQuiz == null) {
                     const body: ILiveQuiz = {
                         roomId: quizId,
-                        users: [],
+                        users: [{ userId, socketId }],
                     }
                     const liveQuizBody: ILiveQuizModel = new LiveQuiz(body);
                     await liveQuizBody.add();
@@ -50,26 +53,24 @@ export class LiveQuizModel {
         }
     }
     
-    public async joinRoom(userId:any,quizId: any) {
-        const result = await this.add(quizId);
+    public async joinRoom(socketId:any,userId:any,quizId: any) {
+        const result = await this.add(socketId,userId,quizId);
 
         if (result.proceed) {
-            const liveQuiz = await LiveQuiz.findOneAndUpdate({ roomId: quizId }, {
-                $push: { "users": userId }
-            },
-                { new: true });
-            
-            return { proceed: true,roomId:liveQuiz.roomId };
+            return { proceed: true,roomId:quizId };
         } else
         {
           return { proceed: false };
         }
     };
 
-    public async getQuestions(userId:any,roomId: any) {
-        const questions = await quizModel.start(userId, roomId);
-
-        return questions;
+    public async getQuestions(body: any, socketId: string) {
+        console.log(body.userId);
+        const livequiz = await LiveQuiz.findOne({ users: { $elemMatch: { userId: body,socketId:socketId } } });
+        console.log(livequiz);
+        const question = await quizModel.fetchOneRandomQuestions(livequiz.roomId);
+        console.log(question);
+        return question;
     };
 
     public async resultCalc(resultId:any,answer:any,userId: any, roomId: any) {

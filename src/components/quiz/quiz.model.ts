@@ -555,6 +555,52 @@ export class QuizModel {
     }catch(e){
       throw Error(e);
     }
-  }
+  };
+
+  async fetchOneRandomQuestions(quizId: string) {
+    return await Quiz.aggregate([
+      {
+        $match: { _id: new ObjectID(quizId) }
+      },
+      {
+        $unwind: { path: '$questions' }
+      },
+      {
+        $lookup: {
+          from: 'questions',
+          let: {
+            categoryId: '$questions.category',
+            questionCount: 1
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$categoryId", "$$categoryId"] , 
+                }
+              }
+            },
+            {
+              $sample: { size: 1 }
+            },
+            {
+              $sort: { points: 1 }
+            }
+          ],
+          as: 'question'
+        }
+      },
+      {
+        $unwind: { path: '$question' }
+      },
+      {
+        $project: {
+          ...mongoDBProjectFields(this.questionFields, 'question'),
+          _id: 0
+        }
+      }
+    ])
+  };
+
 }
 export default new QuizModel();

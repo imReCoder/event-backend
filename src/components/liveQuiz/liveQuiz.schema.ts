@@ -7,7 +7,10 @@ export const livequizSchema: Schema = new Schema({
         ref: 'Quizrooms',
         required: true
     },
-    users: [Schema.Types.ObjectId],
+    users: [{
+        userId: Schema.Types.ObjectId,
+        socketId:String
+    }],
 })
 
 
