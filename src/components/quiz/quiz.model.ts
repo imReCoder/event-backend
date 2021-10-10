@@ -23,7 +23,7 @@ export class QuizModel {
   private default: string = "title maxScore timeAlloted level category icon metadata visibility poolamount startDate endDate isFreebie";
   private fieldsOfUser = "firstName lastName avatar userName createdAt email _id";
   private pruningFields: string = '_id creator createdAt updatedAt __v';
-  private questionFields: string = "content level categoryId options points";
+  private questionFields: string = "_id content level categoryId options points";
   public rulePdf: string = 'https://drive.google.com/uc?export=view&id=1864Oc6WPcYQLq7wXyw4ZWIcN885_NVhU'
 
   async create(body: any, userId: string): Promise<IQuizModel> {

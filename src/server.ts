@@ -1,11 +1,9 @@
 import { config } from "dotenv";
-import ioserver, { Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 import { Server } from "socket.io";
 import { createServer } from "http";
 import liveQuizModel from "./components/liveQuiz/liveQuiz.model";
-import { Request } from "express";
-// import ioclient from 'socket.io-client';
-// import * as http from "http";
+import { schedule } from 'node-cron';
 import { log } from "util";
 
 // Initializing the dot env file very early of this project to use every where
@@ -29,16 +27,23 @@ io.on("connection", (socket: Socket)=> {
     console.log(msg);
   });
 
-  socket.on('joinRoom', async ({ userId, roomId }) =>{
+  socket.on('joinRoom', async ({ userId, roomId }) => {
+    console.log(userId, roomId);
     const user = await liveQuizModel.joinRoom(socket.id, userId, roomId);
         userId = userId;
         // connecting user to roomId
         if (user.proceed) {
             socket.join(user.roomId);
-    }
-    
-    const quesion = await liveQuizModel.getQuestions(userId, socket.id);
-    socket.emit("startQuiz", quesion);
+        }
+  
+      schedule('* * * * *', async () => {
+        const quesion = await liveQuizModel.getQuestions(userId, socket.id);
+        socket.emit("startQuiz", quesion);
+      });
+  });
+
+  socket.on('submitAnswer', async ({ userId, roomId, answer, questionId }) => {
+     await liveQuizModel.resultCalc(questionId, answer, userId, roomId);
   });
 });
 

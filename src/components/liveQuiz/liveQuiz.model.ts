@@ -1,46 +1,29 @@
 import { Quiz } from "./../quiz/quiz.schema";
 import mongoose from 'mongoose';
-import { Request as req } from "express";
 import { IQuiz, IQuizModel } from "./../quiz/quiz.interface";
-import  LeaderBoard  from "../leaderboard/leaderboard.model";
 import { isValidMongoId, pruneFields } from "../../lib/helpers";
 import { HTTP400Error } from "../../lib/utils/httpErrors";
-import { ObjectID } from "bson";
 import { mongoDBProjectFields } from "../../lib/utils";
-import Result from '../result/result.model'
-import Wallet from '../IKCPool/ikcPool.model'
-import _, { forEach, isObject } from 'lodash'
 import Question from '../question/question.model'
-import { ikcPool } from '../IKCPool/ikcPool.schema'
-import { PoolStatus } from "../IKCPool/ikcPool.interface";
-import { MetadataService } from "aws-sdk";
-import { ITransaction, ITransactionModel } from "../transactions/transaction.interface";
-import { Transaction} from "../transactions/transaction.schema";
-import axios from 'axios';
-import transactionModel from "../transactions/transaction.model";
 import { LiveQuiz } from "./liveQuiz.schema";
 import { ILiveQuiz, ILiveQuizModel } from "./liveQuiz.interface";
 import quizModel from "../quiz/quiz.model";
-import resultModel from "../result/result.model";
+import liveQuizLeaderboardModel from "../liveQuizLeaderboard/liveQuizLeaderboard.model";
 
 export class LiveQuizModel {
 
-    private questionFields: string = "content level categoryId options points";
-    public async add(socketId:any,userId:any,quizId:any) {
+    // private questionFields: string = "_id content level categoryId options points";
+    public async add(quizId:any) {
         try {
             const quiz = await Quiz.findById(quizId);
             // just for testing
             if (quiz.startDate < Date.now()) {
-                userId = mongoose.Types.ObjectId(userId);
-                const liveQuiz = await LiveQuiz.findOne({ roomId: quizId });
-                if (liveQuiz == null) {
-                    const body: ILiveQuiz = {
+                const body: ILiveQuiz = {
                         roomId: quizId,
-                        users: [{ userId, socketId }],
+                        users: [],
                     }
-                    const liveQuizBody: ILiveQuizModel = new LiveQuiz(body);
-                    await liveQuizBody.add();
-                }
+                const liveQuizBody: ILiveQuizModel = new LiveQuiz(body);
+                await liveQuizBody.add();
             } else
             {
                 return { proceed: false };
@@ -53,16 +36,56 @@ export class LiveQuizModel {
         }
     }
     
-    public async joinRoom(socketId:any,userId:any,quizId: any) {
-        const result = await this.add(socketId,userId,quizId);
+    public async joinRoom(socketId:string,userId:string,quizId: string) {
+        const quiz = await this.isQuizExist(quizId);
 
-        if (result.proceed) {
-            return { proceed: true,roomId:quizId };
-        } else
-        {
-          return { proceed: false };
+        if (!quiz.alreadyExist) {
+            const quiz = await this.add(quizId);
+
+            if (quiz.proceed) {
+                await LiveQuiz.findOneAndUpdate({ roomId: quizId }, {
+                    $push: { "users": { userId: userId, socketId: socketId } }
+                },
+                    {
+                        new: true
+                    }
+                );
+            }
+        } else {
+            const isUser = await this.isUserExist(userId, quizId);
+            console.log("IsUser = " + isUser.alreadyExist);
+            if (isUser.alreadyExist) {
+                await LiveQuiz.findOneAndUpdate({ $and: [{ roomId: quizId }, { users: { $elemMatch: { userId: userId } } }] }, {
+                    $set: { "users.$.socketId": socketId }
+                },
+                    {
+                        new: true
+                    }
+                );
+            } else
+            {
+                await LiveQuiz.findOneAndUpdate({ roomId: quizId }, {
+                    $push: { "users": { userId: userId, socketId: socketId } }
+                },
+                    {
+                        new: true
+                    }
+                );
+            };
         }
+
+        return { proceed: true, roomId: quizId };
     };
+
+    public async isUserExist(userId: string,roomId:string) {
+        const quiz = await LiveQuiz.findOne({ $and: [{ roomId: roomId }, { users: { $elemMatch: { userId: userId } } }] });
+        console.log("Isquiz = " + quiz);
+        if (quiz == null) {
+            return { alreadyExist: false };
+        }
+
+        return { alreadyExist: true };
+    }
 
     public async getQuestions(body: any, socketId: string) {
         console.log(body.userId);
@@ -73,16 +96,29 @@ export class LiveQuizModel {
         return question;
     };
 
-    public async resultCalc(resultId:any,answer:any,userId: any, roomId: any) {
-        const body = {
-            resultId: resultId,
-            roomId: roomId,
-            answer: answer,
-        };
+    public async isQuizExist(roomId:string) {
+        const liveQuiz = await LiveQuiz.find({ roomId });
 
-        const result = await resultModel.update(body, userId);
+        if (liveQuiz == null) {
+            return { alreadyExist: false };
+        }
 
-        return result.isCorrect;
+        return { alreadyExist: true };
+    }
+
+    public async resultCalc(questionId:string,answer: string, userId: string, roomId: string) {
+
+        const result = await Question.pointsScored(questionId, answer);
+
+        if (result) {
+            const resultBody = {
+                roomId,
+                userId,
+                score: result.points
+            };
+
+            const leaderboard = await liveQuizLeaderboardModel.updateleaderboard(resultBody);
+        }
     };
 }
 export default new LiveQuizModel();
