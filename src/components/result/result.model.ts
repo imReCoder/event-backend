@@ -89,6 +89,33 @@ export class ScoreModel {
         } catch (e) {
             throw new HTTP400Error(e)
         }
+    };
+
+    public async guestResult(body:any) {
+        if (isValidMongoId(body.resultId.toString()) ) {
+            let score: checkedAnswer = await Question.pointsScored(body.quesId, body.answer);
+            console.log(score);
+            let result = await Result.findById(new ObjectID(body.resultId));
+            let attempts = await Result.find({ roomId: result.roomId }).count();
+            let quiz = await Quiz.findById(result.roomId)
+            if (result && attempts != null && attempts != undefined && quiz) {
+                let pointsScored = Number(body.score)
+                let currScore = result.score | 0;
+                if (score.isCorrect) {
+                    result.countCorrect += 1;
+                    result.score = currScore + pointsScored;
+                }
+                result.questionsAnswered.push({ quesId: body.quesId, answerMarked: body.answer, isCorrect: score.isCorrect, pointScored: pointsScored })
+                await result.save();
+                score.points = pointsScored
+                score.total = result.score;
+                return score;
+            } else {
+                throw new HTTP400Error('No such Score ID')
+            }
+        } else {
+            throw new HTTP400Error('No such MongoDB ID')
+        }
     }
 
 }

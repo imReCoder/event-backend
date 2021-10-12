@@ -241,7 +241,6 @@ export class QuizModel {
     if (isValidMongoId(userId.toString()) && isValidMongoId(quizId.toString())) {
       // let codeVerification = await this.verifyCode(quizId, code)
       let quiz = await Quiz.findById(quizId);
-      console.log(quiz);
       if (quiz ) {
         let questionsArray: any[] = []
         for (let condition of quiz.questions) {
@@ -600,6 +599,33 @@ export class QuizModel {
         }
       }
     ])
+  };
+
+  public async guestStart(quizId: string) {
+    if ( isValidMongoId(quizId.toString())) {
+      // let codeVerification = await this.verifyCode(quizId, code)
+      let quiz = await Quiz.findById(quizId);
+      if (quiz ) {
+        let questionsArray: any[] = []
+        for (let condition of quiz.questions) {
+          let data = await Question.fetchRandomQuestions(condition);
+          questionsArray = _.concat(questionsArray, _.cloneDeep(data))
+        }
+        let newScore: any = {
+          roomId: quizId,
+          score: 0,
+          questionsAnswered: [],
+          countCorrect: 0
+        }
+        let result = await Result.create(newScore);
+        questionsArray = _.shuffle(questionsArray)
+        return { resultId: result._id, questions: questionsArray,length:questionsArray.length };
+      } else {
+        throw new HTTP400Error("Not a valid Quiz ID");
+      }
+    } else {
+      throw new HTTP400Error("Not a valid mongoDB ID");
+    }
   };
 
 }

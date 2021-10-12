@@ -25,6 +25,15 @@ class ResultController {
         }
     };
 
+    public guestsubmitAnswer = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+        try {
+            responseHandler.reqRes(req, res).onCreate(msg.SUBMIT_ANSWER, await Result.guestResult(req.query)).send();
+        } catch (e) {
+            next(responseHandler.sendError(e));
+        }
+    };
+
     public timedOut = async (req: Request, res: Response, next: NextFunction) => {
         const responseHandler = new ResponseHandler();
         try {

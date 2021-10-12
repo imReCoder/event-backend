@@ -84,6 +84,15 @@ class QuizController {
     }
   };
 
+  public guestStart = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+    try{
+      responseHandler.reqRes(req, res).onFetch(msg.START, await Quiz.guestStart(req.query.quizId)).send();
+    } catch (e) {
+      next(responseHandler.sendError(e));
+    }
+  }
+
 
   public ruleBook = async (req: Request, res: Response, next: NextFunction) => {
     const responseHandler = new ResponseHandler();
