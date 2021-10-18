@@ -116,7 +116,44 @@ export class ScoreModel {
         } else {
             throw new HTTP400Error('No such MongoDB ID')
         }
-    }
+    };
+
+
+    
+    async guestEnd(body: any) {
+        try {
+            if (isValidMongoId(body.resultId.toString())) {
+                let result = await Result.findById(body.resultId);
+                if (result) {
+                    let quiz: IQuizModel | null = await Quiz.findById(result.roomId);
+                    let accuracyData :any = await Result.aggregate([{
+                        $match: {
+                            $or: [{ roomId: result.roomId }, { userId: result.userId }]
+                        },
+                    }, {
+                        $group: {
+                            _id: '$roomId',
+                            totalCorrect: { $sum: '$countCorrect' },
+                            totalAttempted : { $sum: {$size:'$questionsAnswered'} }
+                        }
+                    }])
+                    if (quiz) {
+                        result.accuracy = Math.ceil((accuracyData[0].totalCorrect / accuracyData[0].totalAttempted)*100);
+                        await result.save();
+                        return { score: result.score, countCorrect: result.countCorrect,maxQuestions: quiz.metadata.maxQuestions}
+                    } else {
+                        throw new HTTP400Error('Not valid MongoDB Quiz ID')
+                    }
+                } else {
+                    throw new HTTP400Error('Not valid MongoDB ID')
+                }
+            } else {
+                throw new HTTP400Error('Not valid MongoDB ID')
+            }
+        } catch (e) {
+            throw new HTTP400Error(e)
+        }
+    };
 
 }
 

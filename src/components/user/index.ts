@@ -12,11 +12,22 @@ export default [
     handler: [userController.create]
   },
   {
+    path: "/user/loggeduser",
+    method: "get",
+    handler:[userController.getLoggedUser]
+  },
+  {
     path: "/login",
     method: "post",
     escapeAuth:true,
     handler:[userController.logIn]
   },
+  // {
+  //   path: "/logout",
+  //   method: "post",
+  //   escapeAuth: true,
+  //   handler: [userController.logIn]
+  // },
   {
     path: "/signup",
     method: "post",

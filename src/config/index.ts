@@ -31,7 +31,9 @@ export const configCors = {
     'https://main.d1k8spudwn7j2p.amplifyapp.com',
     'https://main.d2qffe2mfx34l9.amplifyapp.com',
     'http://polbol.s3-website.ap-south-1.amazonaws.com',
-    'https://ikc-play-new.d1gv456ibcg3vs.amplifyapp.com'
+    'https://ikc-play-new.d1gv456ibcg3vs.amplifyapp.com',
+    'https://quizando.netlify.app',
+    'https://quizando.netlify.app/',
   ],
   // Expose additional which are restricted.
   exposedHeaders: ["X-Auth"]

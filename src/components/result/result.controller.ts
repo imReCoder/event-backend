@@ -51,6 +51,15 @@ class ResultController {
             next(responseHandler.sendError(e));
         }
     };
+
+    public guestEnd = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+        try {
+            responseHandler.reqRes(req, res).onCreate(msg.SUBMIT_ANSWER, await Result.guestEnd(req.query)).send();
+        } catch (e) {
+            next(responseHandler.sendError(e));
+        }
+    };
 }
 
 export default new ResultController;

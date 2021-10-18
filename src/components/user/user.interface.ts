@@ -3,11 +3,12 @@
 export interface IUser {
     firstName: string;
     lastName: string;
-    userName: string;
+    username: string;
     password: string;
     email: string;
     role: string;
     phone: string;
+    facebookId:string;
     otp: number;
     isVerified: boolean;
     dateOfBirth: Date;

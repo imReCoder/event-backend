@@ -11,7 +11,7 @@ export default [
     {
         path: '/common/quiz/submitAnswer',
         escapeAuth: true,
-        method: 'get',
+        method: 'post',
         handler: [resultController.guestsubmitAnswer]
     },
     {
@@ -24,6 +24,6 @@ export default [
         path: '/common/quiz/end',
         escapeAuth: true,
         method: 'get',
-        handler: [resultController.end]
+        handler: [resultController.guestEnd]
     },
 ];

@@ -118,9 +118,27 @@ class UserController {
           req.body.user = user;
           this.signUp(req, res, next);
         }
+      } else {
+        console.log(data);
+        const user = {
+          user: data._doc,
+          alreadyExisted:true
+        }
+        this.createSendToken(req, res, next, user);
       }
     } catch (e) {
       next(responseHandler.sendError(e));
+    }
+  };
+
+  public getLoggedUser = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+    try {
+      const user = await userModel.fetch(req.userId);
+
+      responseHandler.reqRes(req, res).onFetch("User Data", user).send();
+    } catch (e) {
+      responseHandler.sendError(e);
     }
   };
 
@@ -150,9 +168,9 @@ class UserController {
 
   public signUp = async (req: Request, res: Response, next: NextFunction) => {
     const responseHandler = new ResponseHandler();
-    console.log("Hiii signup");
+
     try {
-      let newUser:IUserModel
+      let newUser:any
       if (req.body.user) {
         newUser = await userModel.add(req.body.user);
       }else 
@@ -167,7 +185,7 @@ class UserController {
     }
   };
 
-  private createSendToken = async (req: Request, res: Response, next: NextFunction, user: IUserModel) => {
+  private createSendToken = async (req: Request, res: Response, next: NextFunction, user: any) => {
     const responseHandler = new ResponseHandler();
     const token = this.signToken(user._id);
     console.log("hiii");
@@ -193,10 +211,10 @@ class UserController {
         this.createSendToken(req, res, next, user);
         // responseHandler.reqRes(req, res).send();
       } else {
-        responseHandler.reqRes(req, res).send();
+        next(responseHandler.reqRes(req, res).send());
       }
     } catch (e) {
-      responseHandler.sendError(e);
+      next(responseHandler.sendError(e));
     }
   };
 

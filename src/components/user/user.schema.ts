@@ -4,7 +4,7 @@ import { IUser } from "./user.interface";
 import bcrypt from 'bcrypt'
 
 export interface IUserModel extends IUser,Document {
-  addNewUser(): IUserModel;
+  addNewUser(): any;
   correctPassword(pass1:string,pass2:string):boolean;
 }
 
@@ -22,13 +22,15 @@ export const UserSchema: Schema = new Schema(
     },
     username: {
       type: String,
-      unique:true
+      unique: true,
+      sparse:true
       //required: true,
     },
     password: {
       type: String,
       select: false,
-      unique:true
+      unique: true,
+      sparse:true
     },
     email: {
       type: String,
@@ -58,7 +60,7 @@ export const UserSchema: Schema = new Schema(
 );
 
 UserSchema.methods.addNewUser = async function () {
-    return this.save();
+     return this.save();
 }
 
 
