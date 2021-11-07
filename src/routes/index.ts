@@ -1,10 +1,12 @@
 import User from '../components/user'
-import Quiz from '../components/quiz'
-import Question from '../components/question'
-import Common from '../components/common';
+import Event from '../components/event'
+import EventPortfolio from '../components/eventPortfolio'
+import Form from '../components/form';
+import Response from '../components/response';
 export default [
     ...User,
-    ...Quiz,
-    ...Question,
-    ...Common
+    ...Event,
+    ...EventPortfolio,
+    ...Form,
+    ...Response
 ];

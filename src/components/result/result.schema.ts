@@ -1,40 +1,42 @@
-import { IResultModel } from './result.interface'
-import { model, Model, Schema } from 'mongoose'
+import { Document, Model, model, Schema, Types } from "mongoose";
+import { IResult } from "./result.interface"
 
-export const ResultSchema: Schema = new Schema({
-    userId: {
-        type: Schema.Types.ObjectId,
-        ref: 'users'
-    },
-    roomId: {
-        type: Schema.Types.ObjectId,
-        ref: 'Quiz'
-    },
-    score: { type: Number, required: true },
-    questionsAnswered: [{
-        quesId: { type: Schema.Types.ObjectId, ref: 'Question' },
-        answerMarked: String,
-        isCorrect: Boolean,
-        pointScored: Number
-    }],
-    countCorrect: { type: Number, default: 0 },
-    accuracy: Number
-}, {
-    timestamps: true
-})
-
-ResultSchema.methods.add = async function () {
-    return await this.save()
+export interface IResultModel extends IResult, Document {
+    addNewResult(): any;
 }
 
-ResultSchema.methods.playedBefore = async function () {
-    let exist = await model<IResultModel>('Score').findOne({ userId: this.userId, quizId: this.quizId });
-    if (exist) {
-        exist.score = 0;
-        return await exist.save();
-    } else {
-        return null;
+export const ResultSchema: Schema = new Schema(
+    {
+
+        formId: {
+            type: Schema.Types.ObjectId,
+            ref: "Form"
+        },
+
+        mcq: [{
+            questionId: String,
+            options: [{
+                optionId: String,
+                count: {
+                    type: Number,
+                    default:0
+                }
+            }]
+        }],
+        
+        number: [{
+            questionId: String,
+            answer:[Number]
+        }]
+    },
+    {
+        timestamps: true
     }
+);
+
+ResultSchema.methods.addNewResult = async function () {
+    return this.save();
 }
 
-export const Result: Model<IResultModel> = model<IResultModel>('Result', ResultSchema)
+
+export const Result: Model<IResultModel> = model<IResultModel>("Result", ResultSchema);

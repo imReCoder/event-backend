@@ -7,10 +7,6 @@ const CategorySchema = new Schema({
         type: String,
         required: true
     },
-    numberOfLevels: {
-        type: Number,
-        required: true
-    },
     creator: {
         type: Schema.Types.ObjectId,
         required: true,
@@ -24,6 +20,10 @@ const CategorySchema = new Schema({
     active: {
         type: Boolean,
         default: false
+    },
+    eventCount: {
+        type: Number,
+        default:0
     }
 }, {
     timestamps: true

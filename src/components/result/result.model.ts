@@ -1,160 +1,85 @@
-import { Result } from './result.schema';
-import { IResultModel, IResult } from './result.interface';
-import Question, { checkedAnswer } from '../question/question.model';
-import { ObjectID } from "bson";
-import { HTTP400Error } from '../../lib/utils/httpErrors';
-import { isValidMongoId } from '../../lib/helpers';
-import { Quiz } from '../quiz/quiz.schema';
-import { IQuizModel } from '../quiz/quiz.interface';
+import { generateToken, imageUrl, isValidMongoId, otpGenerator } from "../../lib/helpers";
+import { IResult } from "./result.interface";
+import { IResultModel, Result } from "./result.schema";
+import socialAuth from "./../../lib/middleware/socialAuth";
+import bcrypt from 'bcrypt';
+// import { sendMessage } from "./../../lib/services/textlocal";
+import { HTTP400Error, HTTP401Error } from "../../lib/utils/httpErrors";
+import { IFormModel } from "../form/form.schema";
 
-export class ScoreModel {
+export class ResultModel {
+    public async fetchAll() {
 
+        const data = await Result.find();
 
-    public async create(body: IResult) {
-        const p: IResultModel = new Result(body)
-        return await p.add()
+        return data;
     }
 
-    async update(body: any, userId: string): Promise<checkedAnswer> {
-        console.log("hii");
-        if (isValidMongoId(body.resultId.toString()) && isValidMongoId(userId.toString())) {
-            let score: checkedAnswer = await Question.pointsScored(body.quesId, body.answer);
-            console.log(score);
-            let result = await Result.findById(new ObjectID(body.resultId));
-            let attempts = await Result.find({ userId: userId, roomId: result.roomId }).count();
-            let quiz = await Quiz.findById(result.roomId)
-            if (result && attempts != null && attempts != undefined && quiz) {
-                let pointsScored = Number(body.score)
-                let currScore = result.score | 0;
-                if (score.isCorrect) {
-                    result.countCorrect += 1;
-                    result.score = currScore + pointsScored;
+    public async fetch(id: string) {
+        const data = await Result.findById(id);
+        return data;
+    }
+
+    public async update(id: string, body: any) {
+        const data = await Result.findByIdAndUpdate(id, body, {
+            runValidators: true,
+            new: true
+        })
+
+        return data;
+    }
+
+    public async delete(id: string) {
+        await Result.deleteOne({ _id: id });
+    }
+
+    public async createResultBody(form: IFormModel) {
+        const resultBody: any = {
+            formId: form._id,
+            mcq: [],
+            number: []
+        };
+
+        for (let i = 0; i < form.questions.length; i++){
+            const question: any = form.questions[i];
+            const questionId = question._id;
+            if (question.questiontype == 'mcq') {
+        
+                const options = [];
+
+                for (let j = 0; j < question.options.length; j++){
+                    const optionId = question.options[j];
+
+                    options.push({ optionId, count: 0 });
                 }
-                result.questionsAnswered.push({ quesId: body.quesId, answerMarked: body.answer, isCorrect: score.isCorrect, pointScored: pointsScored })
-                await result.save();
-                score.points = pointsScored
-                score.total = result.score;
-                return score;
-            } else {
-                throw new HTTP400Error('No such Score ID')
+
+                resultBody.mcq.push({ questionId, options });
+            } else if (question.questiontype == 'number') {
+                resultBody.number.push({ questionId, answer:[]});
             }
-        } else {
-            throw new HTTP400Error('No such MongoDB ID')
         }
+
+        await this.add(resultBody);
     }
 
-    async timedOut(body: any) {
-        if (isValidMongoId(body.quesId.toString())) {
-            let result = await Result.findById(new ObjectID(body.resultId));
-            result!.questionsAnswered.push({ quesId: body.quesId, answerMarked: 'TIMED OUT', isCorrect: false, pointScored: 0 })
-            await result!.save();
-            let question = await Question.fetchAnswer(body.quesId)
-            return { quesId: question._id, answer: question.answer }
-        } else {
-            throw new HTTP400Error('Not valid MongoDB ID')
-        }
-    }
-
-
-    async end(body: any) {
+    public async add(body: IResultModel) {
         try {
-            if (isValidMongoId(body.resultId.toString())) {
-                let result = await Result.findById(body.resultId);
-                if (result) {
-                    let quiz: IQuizModel | null = await Quiz.findById(result.roomId);
-                    let accuracyData :any = await Result.aggregate([{
-                        $match: {
-                            $and: [{ roomId: result.roomId }, { userId: result.userId }]
-                        },
-                    }, {
-                        $group: {
-                            _id: '$roomId',
-                            totalCorrect: { $sum: '$countCorrect' },
-                            totalAttempted : { $sum: {$size:'$questionsAnswered'} }
-                        }
-                    }])
-                    if (quiz) {
-                        result.accuracy = Math.ceil((accuracyData[0].totalCorrect / accuracyData[0].totalAttempted)*100);
-                        await result.save();
-                        return { score: result.score, countCorrect: result.countCorrect,maxQuestions: quiz.metadata.maxQuestions}
-                    } else {
-                        throw new HTTP400Error('Not valid MongoDB Quiz ID')
-                    }
-                } else {
-                    throw new HTTP400Error('Not valid MongoDB ID')
-                }
-            } else {
-                throw new HTTP400Error('Not valid MongoDB ID')
-            }
+            console.log(body);
+            const q: IResultModel = new Result(body);
+            console.log("hiii", q);
+            const data: IResultModel = await q.addNewResult();
+            console.log(data);
+            return { data, alreadyExisted: false };
         } catch (e) {
-            throw new HTTP400Error(e)
+            throw new Error(e);
         }
     };
 
-    public async guestResult(body:any) {
-        if (isValidMongoId(body.resultId.toString()) ) {
-            let score: checkedAnswer = await Question.pointsScored(body.quesId, body.answer);
-            console.log(score);
-            let result = await Result.findById(new ObjectID(body.resultId));
-            let attempts = await Result.find({ roomId: result.roomId }).count();
-            let quiz = await Quiz.findById(result.roomId)
-            if (result && attempts != null && attempts != undefined && quiz) {
-                let pointsScored = Number(body.score)
-                let currScore = result.score | 0;
-                if (score.isCorrect) {
-                    result.countCorrect += 1;
-                    result.score = currScore + pointsScored;
-                }
-                result.questionsAnswered.push({ quesId: body.quesId, answerMarked: body.answer, isCorrect: score.isCorrect, pointScored: pointsScored })
-                await result.save();
-                score.points = pointsScored
-                score.total = result.score;
-                return score;
-            } else {
-                throw new HTTP400Error('No such Score ID')
-            }
-        } else {
-            throw new HTTP400Error('No such MongoDB ID')
-        }
-    };
+    public async increaseCount(formId:string,questionId: string,optionId:string) {
+        const data = await Result.findOne({ $and: [{ formId: formId }, { mcq: { $elemMatch: { questionId: questionId, options: optionId } } }] });
 
-
-    
-    async guestEnd(body: any) {
-        try {
-            if (isValidMongoId(body.resultId.toString())) {
-                let result = await Result.findById(body.resultId);
-                if (result) {
-                    let quiz: IQuizModel | null = await Quiz.findById(result.roomId);
-                    let accuracyData :any = await Result.aggregate([{
-                        $match: {
-                            $or: [{ roomId: result.roomId }, { userId: result.userId }]
-                        },
-                    }, {
-                        $group: {
-                            _id: '$roomId',
-                            totalCorrect: { $sum: '$countCorrect' },
-                            totalAttempted : { $sum: {$size:'$questionsAnswered'} }
-                        }
-                    }])
-                    if (quiz) {
-                        result.accuracy = Math.ceil((accuracyData[0].totalCorrect / accuracyData[0].totalAttempted)*100);
-                        await result.save();
-                        return { score: result.score, countCorrect: result.countCorrect,maxQuestions: quiz.metadata.maxQuestions}
-                    } else {
-                        throw new HTTP400Error('Not valid MongoDB Quiz ID')
-                    }
-                } else {
-                    throw new HTTP400Error('Not valid MongoDB ID')
-                }
-            } else {
-                throw new HTTP400Error('Not valid MongoDB ID')
-            }
-        } catch (e) {
-            throw new HTTP400Error(e)
-        }
-    };
-
+        console.log(data);
+    }
 }
 
-export default new ScoreModel()
+export default new ResultModel();

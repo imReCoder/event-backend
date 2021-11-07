@@ -1,20 +1,10 @@
-// you can move this interface at any common place
-// for now I wil stick with in components flow.
-import { Document } from "mongoose";
-import { IQuizModel } from "../quiz/quiz.interface"
+// import { Interface } from "readline";
 
 export interface IResult {
-    userId: string;
-    roomId: IQuizModel['_id'];
-    score: number,
-    questionsAnswered: { quesId: string, answerMarked: string, isCorrect: boolean, pointScored: number }[],
-    countCorrect: number,
-    accuracy?: Number
+    formId: string;
+
+    mcq: Array<object>;
+
+    number: Array<object>;
+
 }
-
-export interface IResultModel extends IResult, Document {
-    add(): Promise<IResultModel>;
-    playedBefore(): Promise<IResultModel>
-}
-
-

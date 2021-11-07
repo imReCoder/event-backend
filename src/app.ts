@@ -6,7 +6,6 @@ import routes from "./routes";
 import errorHandlersMiddleware from "./lib/middleware/errorHandlers.middleware";
 import dbConnection from "./lib/helpers/dbConnection";
 import { schedule } from 'node-cron';
-import quizModel from './components/quiz/quiz.model';
 /* Importing defaults */
 // import "./lib/services/cache";
 // Uncomment this when you are ready to use cache.

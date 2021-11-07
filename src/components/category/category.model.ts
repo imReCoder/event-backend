@@ -3,7 +3,7 @@ import { Category } from './category.schema'
 
 class CategoryModel {
 
-    private default = 'name numberOfLevels icon'
+    private default = 'name  icon'
 
     public async fetchAll() {
         return await Category.find({})
@@ -18,10 +18,26 @@ class CategoryModel {
     }
 
     public async create(body:any,userId:string){
-        body.creator = userId
+        console.log(userId);
+        body.creator = userId;
         let c = new Category(body);
-        return c.add()
+        c.add();
+        return c;
     }
+
+    public async addEventCount(id: string) {
+        try {
+            await Category.findOneAndUpdate({ _id: id }, {
+                $inc: { "eventCount": 1 }
+            }, {
+                new: true
+            });
+
+            return { success: true };
+        } catch (e) {
+            throw new Error(e);
+        }
+    };
 }
 
 export default new CategoryModel()
