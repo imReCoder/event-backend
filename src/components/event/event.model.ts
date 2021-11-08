@@ -6,6 +6,7 @@ import bcrypt from 'bcrypt';
 // import { sendMessage } from "./../../lib/services/textlocal";
 import { HTTP400Error, HTTP401Error } from "../../lib/utils/httpErrors";
 import { Aggregate } from "mongoose";
+import likeModel from "../likes/like.model";
 
 export class EventModel {
     public async fetchAll() {
@@ -49,6 +50,7 @@ export class EventModel {
             body.startDate = new Date(body.startDate);
             body.endDate = new Date(body.endDate);
             const q: IEventModel = new Event(body);
+            await likeModel.add(q._id);
             console.log("hiii", q);
             const data: IEventModel = await q.addNewEvent();
             console.log(data);

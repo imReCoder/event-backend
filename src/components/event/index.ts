@@ -37,5 +37,15 @@ export default [
         method: "delete",
         handler:[eventController.delete]
     },
+    {
+        path: "/event/:id/like",
+        method: "post",
+        handler:[eventController.addLike]
+    },
+    {
+        path: "/event/:id/unlike",
+        method: "post",
+        handler:[eventController.removeLike]
+    }
 ];
 

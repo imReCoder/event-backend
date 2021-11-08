@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt';
 // import { sendMessage } from "./../../lib/services/textlocal";
 import { HTTP400Error, HTTP401Error } from "../../lib/utils/httpErrors";
 import { IFormModel } from "../form/form.schema";
-
+import mongoose from "mongoose";
 export class ResultModel {
     public async fetchAll() {
 
@@ -34,6 +34,7 @@ export class ResultModel {
     }
 
     public async createResultBody(form: IFormModel) {
+        console.log(form);
         const resultBody: any = {
             formId: form._id,
             mcq: [],
@@ -48,7 +49,7 @@ export class ResultModel {
                 const options = [];
 
                 for (let j = 0; j < question.options.length; j++){
-                    const optionId = question.options[j];
+                    const optionId = question.options[j]._id;
 
                     options.push({ optionId, count: 0 });
                 }
@@ -75,10 +76,11 @@ export class ResultModel {
         }
     };
 
-    public async increaseCount(formId:string,questionId: string,optionId:string) {
-        const data = await Result.findOne({ $and: [{ formId: formId }, { mcq: { $elemMatch: { questionId: questionId, options: optionId } } }] });
+    public async increaseCount(formId: string, questionId: string, optionId: string) {
+        console.log(formId, questionId, optionId);
+        const data = await Result.findOne({ $and: [{ formId: formId }, { mcq: { $elemMatch: { questionId: questionId } } }] });
 
-        console.log(data);
+        return data;
     }
 }
 

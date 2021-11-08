@@ -7,6 +7,7 @@ import { commonConfig } from "../../config";
 import { IEvent } from "./event.interface";
 import { IEventModel } from "./event.schema";
 import Category from "../category/category.model";
+import likeModel from "../likes/like.model";
 class EventController {
     public fetchAll = async (req: Request, res: Response, next: NextFunction) => {
         const responseHandler = new ResponseHandler();
@@ -93,6 +94,30 @@ class EventController {
             console.log("Hello fetch", req.query);
             const data = await eventModel.fetchEventsForUser(req.query);
             responseHandler.reqRes(req, res).onFetch("Events Fetched",data).send();
+        } catch (e) {
+            responseHandler.sendError(e);
+        }
+    }
+
+    public addLike = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+
+        try {
+            await likeModel.addLike(req.params.id, req.userId);
+
+            responseHandler.reqRes(req, res).onFetch("Like added");
+        } catch (e) {
+            responseHandler.sendError(e);
+        }
+    }
+
+    public removeLike = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+
+        try {
+            await likeModel.removeLike(req.params.id, req.userId);
+
+            responseHandler.reqRes(req, res).onFetch("Like added");
         } catch (e) {
             responseHandler.sendError(e);
         }

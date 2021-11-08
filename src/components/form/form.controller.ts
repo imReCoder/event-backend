@@ -5,6 +5,7 @@ import { user as msg } from "../../lib/helpers/customMessage";
 import { commonConfig } from "../../config";
 import { IForm } from "./form.interface";
 import { IFormModel } from "./form.schema";
+import resultModel from "../result/result.model";
 
 class FormController {
     public fetchAll = async (req: Request, res: Response, next: NextFunction) => {
@@ -69,6 +70,18 @@ class FormController {
         try {
             await formmodel.delete(req.params.id);
             responseHandler.reqRes(req, res).onCreate(msg.UPDATED).send();
+        } catch (e) {
+            next(responseHandler.sendError(e));
+        }
+    }
+
+    public increaseCount = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+
+        try {
+            const data = await resultModel.increaseCount(req.params.id, '6188b45a1b598f9050651e4e', '6188b45a1b598f9050651e52');
+
+            responseHandler.reqRes(req, res).onFetch("Count increased", data).send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }

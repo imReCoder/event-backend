@@ -7,6 +7,11 @@ export default [
         handler:[formController.create]
     },
     {
+        path: "/form/:id/result",
+        method: "post",
+        handler: [formController.increaseCount]
+    },
+    {
         path: "/form/:id",
         method: "patch",
         handler:[formController.update]
