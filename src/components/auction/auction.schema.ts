@@ -5,6 +5,7 @@ export interface IAuctionModel extends IAuction, Document {
     add(): any;
 }
 
+
 export const AuctionSchema: Schema = new Schema(
     {
         title: {
