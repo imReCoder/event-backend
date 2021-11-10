@@ -21,7 +21,11 @@ export const ResultSchema: Schema = new Schema(
                     type: Number,
                     default:0
                 }
-            }]
+            }],
+            totalOptionCount: {
+                type: Number,
+                default:0
+            }
         }],
         
         number: [{

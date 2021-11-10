@@ -15,7 +15,8 @@ export interface ITransaction {
         voucherId?: string,
         mode?: string,
         offerId?: string,
-        message?:string
+        message?: string,
+        auctionId?:string
     },
     status: transactionStatus,
     createdAt: Date

@@ -25,6 +25,7 @@ const TransactionModel = new Schema({
         gateway: String,
         offerId: String,
         message: String,
+        auctionId:String,
     },
     status: {
         type: String,

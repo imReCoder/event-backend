@@ -78,9 +78,89 @@ export class ResultModel {
 
     public async increaseCount(formId: string, questionId: string, optionId: string) {
         console.log(formId, questionId, optionId);
-        const data = await Result.findOne({ $and: [{ formId: formId }, { mcq: { $elemMatch: { questionId: questionId } } }] });
+        const data = await Result.findOne({ formId: formId });
+
+        for (let i = 0; i < data.mcq.length; i++){
+            const question: any = data.mcq[i];
+            let flag = 0;
+            if (question.questionId == questionId) {
+                for (let j = 0; j < question.options.length;j++){
+                    const option = question.options[j];
+
+                    if (option.optionId == optionId) {
+                        option.count = option.count + 1;
+                        question.totalOptionCount = question.totalOptionCount + 1;
+                        flag = 1;
+                        break;
+                    }
+                }
+            }
+
+            if (flag) {
+                break;
+            }
+        }
+
+        await data.save();
+        return data;
+    }
+
+    public async increaseNumber(formId: string, questionId: string,answer:number) {
+        const data = await Result.findOneAndUpdate({ $and: [{ formId: formId }, { number: { $elemMatch: { questionId: questionId } } }] }, {
+            $push:{"number.$.answer":answer}
+        },{
+            new:true
+        });
 
         return data;
+    }
+
+
+    public async getMCQData(formId: string,questionId:string) {
+        const data = await Result.findOne({ formId: formId });
+        let optionPercentage = [];
+        
+
+        for (let i = 0; i < data.mcq.length; i++) {
+            const question: any = data.mcq[i];
+
+            if (question.questionId == questionId) {
+                for (let j = 0; j < question.options.length; j++) {
+                    const option = question.options[j];
+                    const optionId = option.optionId;
+
+                    const value = (option.count * 100) / question.totalOptionCount;
+
+                    optionPercentage.push({ optionId, value });
+                    
+                }
+
+                break;
+            }
+        }
+
+        return optionPercentage.length > 0 ? optionPercentage : new HTTP400Error(`No question found with questionId ${questionId}`);
+    };
+
+    public async getNumberData(formId: string, questionId: string) {
+        const data = await Result.aggregate([
+            {
+                $match:{formId:formId}
+            },
+            {
+                 $unwind: "$number" 
+            },
+            {
+                $match:{"$questionId":questionId}
+            },
+            {
+                $group:
+                {
+                    _id: "$answer",
+                    answerCount: { $sum: 1 }
+                }
+            }
+        ])
     }
 }
 
