@@ -30,7 +30,13 @@ export const ResultSchema: Schema = new Schema(
         
         number: [{
             questionId: String,
-            answer:[Number]
+            answers: [{
+                answer:Number,
+                count: {
+                    type: Number,
+                    default:0
+                }
+            }],
         }]
     },
     {

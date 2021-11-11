@@ -56,7 +56,7 @@ export class ResultModel {
 
                 resultBody.mcq.push({ questionId, options });
             } else if (question.questiontype == 'number') {
-                resultBody.number.push({ questionId, answer:[]});
+                resultBody.number.push({ questionId, answers:[]});
             }
         }
 
@@ -105,13 +105,47 @@ export class ResultModel {
         return data;
     }
 
-    public async increaseNumber(formId: string, questionId: string,answer:number) {
-        const data = await Result.findOneAndUpdate({ $and: [{ formId: formId }, { number: { $elemMatch: { questionId: questionId } } }] }, {
-            $push:{"number.$.answer":answer}
-        },{
-            new:true
-        });
+    // public async increaseNumber(formId: string, questionId: string,answer:number) {
+    //     const data = await Result.findOneAndUpdate({ $and: [{ formId: formId }, { number: { $elemMatch: { questionId: questionId } } }] }, {
+    //         $push:{"number.$.answer":answer}
+    //     },{
+    //         new:true
+    //     });
 
+    //     return data;
+    // }
+
+    public async increaseNumber(formId: string, questionId: string, answer: number) {
+        // console.log(formId, questionId, optionId);
+        const data = await Result.findOne({ formId: formId });
+
+        for (let i = 0; i < data.number.length; i++) {
+            const question: any = data.number[i];
+            let flag = 0;
+            if (question.questionId == questionId) {
+                for (let j = 0; j < question.answers.length; j++) {
+                    const answer = question.answers[j];
+
+                    if (answer.answer == answer) {
+                        answer.count = answer.count + 1;
+                        // question.totalOptionCount = question.totalOptionCount + 1;
+                        flag = 1;
+                        break;
+                    }
+                }
+
+                if (!flag) {
+                    question.answers.push({ answer, count: 0 });
+                    flag = 1;
+                }
+            }
+
+            if (flag) {
+                break;
+            } 
+        }
+
+        await data.save();
         return data;
     }
 
@@ -143,25 +177,19 @@ export class ResultModel {
     };
 
     public async getNumberData(formId: string, questionId: string) {
-        const data = await Result.aggregate([
-            {
-                $match:{formId:formId}
-            },
-            {
-                 $unwind: "$number" 
-            },
-            {
-                $match:{"$questionId":questionId}
-            },
-            {
-                $group:
-                {
-                    _id: "$answer",
-                    answerCount: { $sum: 1 }
-                }
+        const data = await Result.findOne({ formId: formId });
+
+
+        for (let i = 0; i < data.number.length; i++) {
+            const question: any = data.number[i];
+
+            if (question.questionId == questionId) {
+                return question.answers;
             }
-        ])
-    }
+        }
+
+        return [];
+    };
 }
 
 export default new ResultModel();
