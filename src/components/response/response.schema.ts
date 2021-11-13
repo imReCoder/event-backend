@@ -21,7 +21,8 @@ export const ResponseSchema: Schema = new Schema(
             questionId: String,
             questionText:String,
             answerId: String,
-            answerText:String
+            answerText: String,
+            questionType:String
         }],
     },
     {

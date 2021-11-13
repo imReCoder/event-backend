@@ -5,6 +5,7 @@ import socialAuth from "./../../lib/middleware/socialAuth";
 import bcrypt from 'bcrypt';
 // import { sendMessage } from "./../../lib/services/textlocal";
 import { HTTP400Error, HTTP401Error } from "../../lib/utils/httpErrors";
+import resultModel from "../result/result.model";
 
 export class ResponseModel {
     public async fetchAll() {
@@ -39,12 +40,38 @@ export class ResponseModel {
             const q: IResponseModel = new Response(body);
             console.log("hiii", q);
             const data: IResponseModel = await q.addNewResponse();
+            await this.submitAnswer(data);
             console.log(data);
             return { data, alreadyExisted: false };
         } catch (e) {
             throw new Error(e);
         }
     };
+
+    public async submitAnswer(responseBody: IResponseModel) {
+        try {
+            const formId = responseBody.formId;
+
+            for (let i = 0; i < responseBody.answers.length; i++){
+                const answer:any = responseBody.answers[i];
+
+                const questionType = answer.questionType;
+                const questionId = answer.questionId;
+                console.log(formId, questionId, questionType);
+                if (questionType == "mcq") {
+                    const optionId = answer.answerId;
+
+                    await resultModel.increaseCount(formId, questionId, optionId);
+                } else if (questionType == "number") {
+                    const answerText = Number(answer.answerText);
+
+                    await resultModel.increaseNumber(formId, questionId, answerText);
+                }
+            }
+        } catch (e) {
+            throw new HTTP400Error(e.message);
+        }
+    }
 }
 
 export default new ResponseModel();

@@ -94,6 +94,7 @@ export class ResultModel {
                         break;
                     }
                 }
+                
             }
 
             if (flag) {
@@ -118,10 +119,9 @@ export class ResultModel {
     public async increaseNumber(formId: string, questionId: string, answer: number) {
         // console.log(formId, questionId, optionId);
         const data = await Result.findOne({ formId: formId });
-
+        let flag = 0;
         for (let i = 0; i < data.number.length; i++) {
             const question: any = data.number[i];
-            let flag = 0;
             if (question.questionId == questionId) {
                 for (let j = 0; j < question.answers.length; j++) {
                     const answer = question.answers[j];
@@ -135,7 +135,7 @@ export class ResultModel {
                 }
 
                 if (!flag) {
-                    question.answers.push({ answer, count: 0 });
+                    question.answers.push({ answer, count: 1 });
                     flag = 1;
                 }
             }
