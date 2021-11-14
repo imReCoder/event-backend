@@ -36,13 +36,13 @@ export const AuctionSchema: Schema = new Schema(
             amount:Number
         },
 
-        previousBid: {
+        previousBid: [{
             user: {
                 type: Schema.Types.ObjectId,
                 ref: "User"
             },
             amount: Number
-        },
+        }],
 
         creator: {
             type: String,
