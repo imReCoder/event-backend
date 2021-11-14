@@ -10,6 +10,7 @@ import mongoose from "mongoose";
 import axios from "axios";
 import transactionModel from "../transactions/transaction.model";
 import { Transaction } from "../transactions/transaction.schema";
+import auctionEventModel from "../auctionEvent/auctionEvent.model";
 export class AuctionModel {
     public async fetchAll() {
 
@@ -32,17 +33,19 @@ export class AuctionModel {
         return data;
     }
 
-    public async delete(id: string) {
+    public async delete(id: string, auctionEventId: string) {
+        await auctionEventModel.removeAuctionItems(auctionEventId, id);
         await Auction.deleteOne({ _id: id });
     }
 
 
-    public async add(body: IAuctionModel,userId:string) {
+    public async add(body: IAuctionModel,userId:string,auctionEventId:string) {
         try {
             console.log(body);
             body.creator = userId;
             const q: IAuctionModel = new Auction(body);
             console.log("hiii", q);
+            await auctionEventModel.addAuctionItems(auctionEventId, q._id);
             const data: IAuctionModel = await q.add();
             console.log(data);
             return { data, alreadyExisted: false };
@@ -77,7 +80,8 @@ export class AuctionModel {
                     };
 
                     const data = await Auction.findOneAndUpdate({ _id: auctionId }, {
-                        $set: { "currentBid": currentBid, "previousBid": auction.currentBid }
+                        $set: { "currentBid": currentBid },
+                        $push: { "previousBid": auction.currentBid }
                     },
                         { new: true });
             
@@ -142,7 +146,7 @@ export class AuctionModel {
     public async walletToMasterTransaction(transactionBody :any ) {
         try {
             const apiKey = process.env.IKCDEALKEY;
-            const url = `http://localhost:8000/wallet/addToWallet?apiKey=${apiKey}`;
+            const url = `http://localhost:8000/wallet/removeFromWallet?apiKey=${apiKey}`;
 
             const res = await this.axiosRequestor(url, transactionBody);
 
@@ -182,7 +186,7 @@ export class AuctionModel {
     public async masterToWalletTransaction(transactionBody: any) {
         try {
             const apiKey = process.env.IKCDEALKEY;
-            const url = `http://localhost:8000/wallet/removeFromWallet?apiKey=${apiKey}`;
+            const url = `http://localhost:8000/wallet/addToWallet?apiKey=${apiKey}`;
 
             const res = await this.axiosRequestor(url, transactionBody);
 

@@ -47,7 +47,7 @@ export const AuctionSchema: Schema = new Schema(
         creator: {
             type: String,
             required:true
-        }
+        },
     },
     {
         timestamps: true
