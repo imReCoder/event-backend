@@ -1,4 +1,5 @@
 import eventPortfolioController from "./eventPortfolio.controller";
+import { s3UploadMulter } from "../../lib/services/s3";
 
 export default [
     {
@@ -23,24 +24,34 @@ export default [
         handler:[eventPortfolioController.fetch]
     },
     {
-        path: "eventportfolio/:id",
+        path: "/eventportfolio/:id",
         method: "delete",
         handler:[eventPortfolioController.delete]
     },
     {
-        path: "eventportfolio/:id/follower",
+        path: "/eventportfolio/:id/follower",
         method: "post",
         handler:[eventPortfolioController.addFollower]
     },
     {
-        path: "eventportfolio/:id/follow",
+        path: "/eventportfolio/:id/removefollower",
+        method: "post",
+        handler: [eventPortfolioController.removeFollower]
+    },
+    {
+        path: "/eventportfolio/:id/follow",
         method: "post",
         handler:[eventPortfolioController.addFollow]
     },
     {
-        path: "eventportfolio/:id/upcomingevent/:eventId",
+        path: "/eventportfolio/:id/upcomingevent/:eventId",
         method: "delete",
         handler:[eventPortfolioController.addUpcomingEvent]
-    }
+    },
+    {
+        path: "/eventportfolio/upload/:id",
+        method: "post",
+        handler: [s3UploadMulter.single('file'), eventPortfolioController.uploadFile]
+    },
 ];
 

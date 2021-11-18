@@ -15,7 +15,7 @@ export const s3 = new S3({
 export const s3UploadMulter = multer({
   storage: multerS3({
     s3,
-    bucket: 'polbol-media',
+    bucket: 'ikcdeal-bucket',
     acl: 'public-read',
     contentType: multerS3.AUTO_CONTENT_TYPE,
     key: (req: any, file: any, cb: any) => {

@@ -49,7 +49,7 @@ class FormController {
         const responseHandler = new ResponseHandler();
 
         try {
-            responseHandler.reqRes(req, res).onFetch("Event Fetched", await formmodel.fetchByEventId(req.params.eventId));
+            responseHandler.reqRes(req, res).onFetch("Event Fetched", await formmodel.fetchByEventId(req.params.id)).send();
         } catch (e) {
             responseHandler.sendError(e);
         }

@@ -28,12 +28,12 @@ export default [
         handler:[formController.fetch]
     },
     {
-        path: "form/:id",
+        path: "/form/:id",
         method: "delete",
         handler:[formController.delete]
     },
     {
-        path: "form/event/:id",
+        path: "/form/event/:id",
         method: "get",
         handler:[formController.fetchByEvent]
     },

@@ -58,6 +58,15 @@ export const EventSchema: Schema = new Schema(
         eventPortfolioId: {
             type: String,
             ref:"EventPortfolio"
+        },
+        onlinePlatform: {
+            type:String
+        },
+        venuePlace: {
+            type:String,
+        },
+        venueLocation: {
+            type:String
         }
     },
     {

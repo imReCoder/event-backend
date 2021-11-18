@@ -121,6 +121,37 @@ class EventPortfolioController {
             next(responseHandler.sendError(e));
         }
     }
+
+    public removeFollower = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+
+        try {
+            const data = await eventPortfolio.removeFollower(req.params.id, req.userId);
+
+            responseHandler.reqRes(req, res).onCreate("New Follower Added", data).send();
+        } catch (e) {
+            next(responseHandler.sendError(e));
+        }
+    }
+
+
+
+    public uploadFile = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+        try {
+            // @ts-ignore
+            console.log(req.file);
+            // req.body.filename = req.file.originalname;
+            req.body.locationUrl = req.file.location;
+            const result = await eventPortfolio.addGallery(req.params.id, req.body.locationUrl);
+            console.log(result);
+
+            // s3UploadMulter.single('video')
+            responseHandler.reqRes(req, res).onCreate("Video uploaded", result).send();
+        } catch (e) {
+            next(responseHandler.sendError(e));
+        }
+    };
     
 }
 

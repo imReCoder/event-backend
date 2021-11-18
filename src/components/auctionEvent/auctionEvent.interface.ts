@@ -6,4 +6,12 @@ export interface IAuctionEvent {
     auctionItems: Array<object>;
     creator: string;
 
+    startDate: Date;
+    endDate: Date;
+    
+    type: string;
+
+    coverImage: string;
+    icon: string;
+
 }

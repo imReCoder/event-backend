@@ -2,7 +2,7 @@ import auctionEventController from "./auctionEvent.controller";
 
 export default [
     {
-        path: "/auctionevent/:id/add",
+        path: "/auctionevent/add",
         method: "post",
         handler: [auctionEventController.create]
     },
@@ -25,6 +25,16 @@ export default [
         path: "/auctionevent/:id",
         method: "patch",
         handler: [auctionEventController.update]
+    },
+    {
+        path: "/auctionevent/icon/upload/:id",
+        method: "post",
+        handler:[auctionEventController.addIcon]
+    },
+    {
+        path: "/auctionevent/coverImage/upload/:id",
+        method: "post",
+        handler: [auctionEventController.addCoverImage]
     }
 ];
 

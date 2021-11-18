@@ -50,13 +50,13 @@ export class EventModel {
             body.startDate = new Date(body.startDate);
             body.endDate = new Date(body.endDate);
             const q: IEventModel = new Event(body);
-            await likeModel.add(q._id);
+            // await likeModel.add(q._id);
             console.log("hiii", q);
             const data: IEventModel = await q.addNewEvent();
             console.log(data);
             return { data, alreadyExisted: false };
         } catch (e) {
-            throw new Error(e);
+          throw new HTTP400Error(e);
         }
     };
 
@@ -67,25 +67,29 @@ export class EventModel {
 
             return data;
         } catch (e) {
-            throw new Error(e);
+            throw new HTTP400Error(e);
         }
     };
 
 
-    public async getEvents(condition: any, sortArgument: any) {
-    const data: Aggregate<IEventModel[]> = Event.aggregate([
-      {$match: condition},
-      {$sort: sortArgument},
-      {
-        $lookup: {
-          from: "EventPortfolio",
-          localField: "eventPortfolioId",
-          foreignField: "_id",
-          as: "eventPortfolio"
-        }
-      }, 
-    ]);
-    return data;
+  public async getEvents(condition: any, sortArgument: any) {
+    try {
+      const data: Aggregate<IEventModel[]> = Event.aggregate([
+        { $match: condition },
+        { $sort: sortArgument },
+        {
+          $lookup: {
+            from: "EventPortfolio",
+            localField: "eventPortfolioId",
+            foreignField: "_id",
+            as: "eventPortfolio"
+          }
+        },
+      ]);
+      return data;
+    } catch (e) {
+      throw new HTTP400Error(e);
+    }
   }
 
    public async fetchEvents(query: { lastTime?: string }) {
@@ -108,7 +112,39 @@ export class EventModel {
       length: data.length,
       data
     };
+  };
+
+  public async addGallery(id: string, filelocation: string) {
+    try {
+      console.log(id);
+      const data = await Event.findOneAndUpdate({ _id: id }, {
+        $push: { "gallery": filelocation }
+      },
+        { new: true });
+      
+      return data;
+    } catch (e) {
+      throw new HTTP400Error(e.message);
+    }
+  };
+
+
+  public async increaseShareCount(id: string) {
+    try {
+      console.log(id);
+      const data = await Event.findOneAndUpdate({ _id: id }, {
+        $inc: { "shares": 1 }
+      },
+        { new: true });
+      
+      console.log(data);
+      return data;
+    } catch (e) {
+      throw new HTTP400Error(e);
+    }
   }
+
+
 
 }
 

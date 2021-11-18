@@ -18,6 +18,29 @@ export const AuctionEventSchema: Schema = new Schema(
             required: true
         },
 
+        startDate: {
+            type: Date,
+            required:true
+        },
+
+        endDate: {
+            type: Date,
+        },
+
+        icon: {
+            type:String
+        },
+
+        type: {
+            type: String,
+            enum: ['live', 'timed'],
+            required:true
+        },
+
+        coverImage: {
+            type:String
+        },
+
         auctionItems: [
             {
                 type: Schema.Types.ObjectId,

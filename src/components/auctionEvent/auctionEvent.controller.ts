@@ -76,6 +76,37 @@ class AuctionEventController {
             next(responseHandler.sendError(e));
         }
     };
+
+    public addIcon = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+        try {
+            console.log(req.file);
+            // req.body.filename = req.file.originalname;
+            req.body.locationUrl = req.file.location;
+            const result = await auctionEventModel.addIcon(req.params.id, req.body.locationUrl);
+            console.log(result);
+
+            responseHandler.reqRes(req, res).onCreate("File Uploaded", result).send();
+        } catch (e) {
+            next(responseHandler.sendError(e));
+        }
+    };
+
+
+    public addCoverImage = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+        try {
+            console.log(req.file);
+            // req.body.filename = req.file.originalname;
+            req.body.locationUrl = req.file.location;
+            const result = await auctionEventModel.addcoverImage(req.params.id, req.body.locationUrl);
+            console.log(result);
+
+            responseHandler.reqRes(req, res).onCreate("File Uploaded", result).send();
+        } catch (e) {
+            next(responseHandler.sendError(e));
+        }
+    };
 }
 
 export default new AuctionEventController();

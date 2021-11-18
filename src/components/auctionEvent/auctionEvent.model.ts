@@ -41,11 +41,49 @@ export class AuctionEventModel {
         try {
             console.log(body);
             body.creator = userId;
+
+            if (body.startDate) {
+                body.startDate = new Date(body.startDate);
+            }
+
+
+            if (body.endDate) {
+                body.endDate = new Date(body.endDate);
+            }
+
             const q: IAuctionEventModel = new AuctionEvent(body);
             const data: IAuctionEventModel = await q.add();
             return { data, alreadyExisted: false };
         } catch (e) {
             throw new Error(e);
+        }
+    };
+
+    public async addIcon(id: string, filelocation: string) {
+        try {
+            console.log(id);
+            const data = await AuctionEvent.findOneAndUpdate({ _id: id }, {
+                $set: { "icon": filelocation }
+            },
+                { new: true });
+
+            return data;
+        } catch (e) {
+            throw new HTTP400Error(e.message);
+        }
+    };
+
+    public async addcoverImage(id: string, filelocation: string) {
+        try {
+            console.log(id);
+            const data = await AuctionEvent.findOneAndUpdate({ _id: id }, {
+                $set: { "coverImage": filelocation }
+            },
+                { new: true });
+
+            return data;
+        } catch (e) {
+            throw new HTTP400Error(e.message);
         }
     };
 

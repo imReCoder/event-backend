@@ -20,6 +20,7 @@ export class FormModel {
         return data;
     }
 
+
     public async update(id: string, body: any) {
         const data = await Form.findByIdAndUpdate(id, body, {
             runValidators: true,
@@ -50,11 +51,12 @@ export class FormModel {
 
     public async fetchByEventId(eventId: string) {
         try {
-            const data = await Form.findOne({ eventId });
-
+            console.log(eventId);
+            const data = await Form.findOne({ eventId:eventId });
+            console.log(data);
             return data;
         } catch (e) {
-            throw new Error(e);
+            throw new HTTP400Error(e);
         }
     };
 }
