@@ -10,5 +10,6 @@ export interface IAuction {
     currentBid: any;
 
     creator: string;
+    auctionEventId: string;
 
 }

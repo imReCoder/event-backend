@@ -33,6 +33,33 @@ class AuctionController {
         }
     };
 
+    public fetchAuctionItemsByAuctionEvent = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+        try {
+            const data = await auctionModel.fetchAuctionItemsByAuctionEvent(req.params.auctionEventId);
+
+            responseHandler.reqRes(req, res).onFetch("Auction Items Fetched", data).send();
+        } catch (e) {
+            next(responseHandler.sendError(e));
+        }
+    };
+
+
+    public addImage = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+        try {
+            console.log(req.file);
+            // req.body.filename = req.file.originalname;
+            req.body.locationUrl = req.file.location;
+            const result = await auctionModel.addImage(req.params.id, req.body.locationUrl);
+            console.log(result);
+
+            responseHandler.reqRes(req, res).onCreate("File Uploaded", result).send();
+        } catch (e) {
+            next(responseHandler.sendError(e));
+        }
+    };
+
     // public addCategory = async (req: Request, res: Response, next: NextFunction) => {
     //     const responseHandler = new ResponseHandler();
     //     try {

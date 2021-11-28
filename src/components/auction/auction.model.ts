@@ -43,14 +43,28 @@ export class AuctionModel {
         try {
             console.log(body);
             body.creator = userId;
+            body.auctionEventId = auctionEventId;
+
+            // if (body.startDate) {
+            //     body.startDate = new Date(body.startDate);
+            // }
+
+
+            // if (body.endDate) {
+            //     body.endDate = new Date(body.endDate);
+            // }
+
+            // if(body.startDate < body.endDate){
+            //     throw new HTTP400Error("Error in Dates");
+            // }
+
             const q: IAuctionModel = new Auction(body);
             console.log("hiii", q);
-            await auctionEventModel.addAuctionItems(auctionEventId, q._id);
             const data: IAuctionModel = await q.add();
             console.log(data);
-            return { data, alreadyExisted: false };
+            return data;
         } catch (e) {
-            throw new Error(e);
+            throw new HTTP400Error(e);
         }
     };
 
@@ -97,6 +111,33 @@ export class AuctionModel {
             throw new HTTP400Error(e);
         }
     }
+
+    public async fetchAuctionItemsByAuctionEvent(auctionEventId: string) {
+        try {
+            const auctionItems = await Auction.find({ auctionEventId: auctionEventId }).populate({
+                path: 'auctionEventId'
+            });
+
+            return auctionItems;
+        } catch (e) {
+            throw new HTTP400Error(e);
+        }
+    }
+
+
+    public async addImage(id: string, filelocation: string) {
+        try {
+            console.log(id);
+            const data = await Auction.findOneAndUpdate({ _id: id }, {
+                $push: { "images": filelocation }
+            },
+                { new: true });
+
+            return data;
+        } catch (e) {
+            throw new HTTP400Error(e.message);
+        }
+    };
 
     public async axiosRequestor(url: string,axiosdata:any = {}) {
         try {

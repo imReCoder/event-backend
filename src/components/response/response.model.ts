@@ -63,8 +63,10 @@ export class ResponseModel {
 
                     await resultModel.increaseCount(formId, questionId, optionId);
                 } else if (questionType == "number") {
+                    console.log(answer);
+                    console.log(answer.answerText);
                     const answerText = Number(answer.answerText);
-
+                    console.log(answerText);
                     await resultModel.increaseNumber(formId, questionId, answerText);
                 }
             }

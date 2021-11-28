@@ -124,10 +124,11 @@ export class ResultModel {
             const question: any = data.number[i];
             if (question.questionId == questionId) {
                 for (let j = 0; j < question.answers.length; j++) {
-                    const answer = question.answers[j];
-
-                    if (answer.answer == answer) {
-                        answer.count = answer.count + 1;
+                    const answerData = question.answers[j];
+                    // console.log("answer" + answer.answer + "parameter answer" + answer);
+                    // console.log(answer.answer == answer);
+                    if (answerData.answer == answer) {
+                        answerData.count = answerData.count + 1;
                         // question.totalOptionCount = question.totalOptionCount + 1;
                         flag = 1;
                         break;

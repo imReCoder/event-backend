@@ -12,6 +12,11 @@ export default [
     handler: [userController.create]
   },
   {
+    path: "/user/wallet",
+    method: "get",
+    handler: [userController.fetchWalletBalance]
+  },
+  {
     path: "/user/loggeduser",
     method: "get",
     handler:[userController.getLoggedUser]
@@ -65,11 +70,35 @@ export default [
     method: "patch",
     handler: [userController.update]
   },
+  // {
+  //   path: "/user/verifyUser",
+  //   escapeAuth: true,
+  //   method: "post",
+  //   handler:[userController.verifyUser]
+  // },
   {
-    path: "/user/verifyUser",
+    path: "/user/addPhoneNumber",
     method: "post",
-    handler:[userController.verifyUser]
-  }
+    handler:[userController.addPhoneNumber]
+  },
+  {
+    path: "/user/:id/verify-otp",
+    method: "get",
+    escapeAuth: true,
+    handler: [userController.verifyOtp]
+  },
+  {
+    path: "/user/generateOTP",
+    escapeAuth:true,
+    method: "post",
+    handler:[userController.generateOTP]
+  },
+  {
+    path: "/user/login/socialAuth/addphone",
+    method: "get",
+    escapeAuth: true,
+    handler: [userController.socialAuthAddPhone]
+  },
 //   {
 //     path: "/user/:id/photos",
 //     method: "get",

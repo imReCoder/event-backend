@@ -5,7 +5,8 @@ import bcrypt from 'bcrypt'
 
 export interface IUserModel extends IUser,Document {
   addNewUser(): any;
-  correctPassword(pass1:string,pass2:string):boolean;
+  correctPassword(pass1: string, pass2: string): boolean;
+  sendOtpToMobile(): any;
 }
 
 export const UserSchema: Schema = new Schema(
@@ -46,12 +47,26 @@ export const UserSchema: Schema = new Schema(
       type:String
     },
     phone: {
-      type:String
+      type: String,
+      minlength: 3,
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female", "other"],
     },
     otp: Number,
     isVerified: {
       type: Boolean,
       default:false
+    },
+    deactivation: {
+      type: Boolean,
+      default: false
+    },
+    tokens: [String],
+    hints: {
+      type: Number,
+      default:0
     }
   },
   {

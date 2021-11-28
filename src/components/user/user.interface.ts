@@ -14,4 +14,6 @@ export interface IUser {
     dateOfBirth: Date;
     followers: Array<string>;
     following: Array<string>;
+
+    deactivation:boolean;
 }

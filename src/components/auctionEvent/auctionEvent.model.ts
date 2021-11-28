@@ -51,11 +51,15 @@ export class AuctionEventModel {
                 body.endDate = new Date(body.endDate);
             }
 
+            if(body.startDate < body.endDate){
+                throw new HTTP400Error("Error in Dates");
+            }
+
             const q: IAuctionEventModel = new AuctionEvent(body);
             const data: IAuctionEventModel = await q.add();
-            return { data, alreadyExisted: false };
+            return data;
         } catch (e) {
-            throw new Error(e);
+            throw new HTTP400Error(e);
         }
     };
 

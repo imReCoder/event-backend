@@ -1,4 +1,5 @@
 import formController from "./form.controller";
+import resultController from "./../result/result.controller";
 
 export default [
     {
@@ -36,6 +37,16 @@ export default [
         path: "/form/event/:id",
         method: "get",
         handler:[formController.fetchByEvent]
+    },
+    {
+        path: "/form/:formId/mcq/result",
+        method: "get",
+        handler:[resultController.getMCQData]
+    },
+    {
+        path: "/form/:formId/number/result",
+        method: "get",
+        handler: [resultController.getNumberData]
     },
 ];
 

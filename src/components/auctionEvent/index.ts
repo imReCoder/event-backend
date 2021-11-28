@@ -1,4 +1,5 @@
 import auctionEventController from "./auctionEvent.controller";
+import { s3UploadMulter } from "../../lib/services/s3";
 
 export default [
     {
@@ -14,11 +15,13 @@ export default [
     {
         path: "/auctionevent/fetchAll",
         method: "get",
+        escapeAuth:true,
         handler: [auctionEventController.fetchAll]
     },
     {
         path: "/auctionevent/:id",
         method: "get",
+        escapeAuth:true,
         handler: [auctionEventController.fetch]
     },
     {
@@ -29,12 +32,12 @@ export default [
     {
         path: "/auctionevent/icon/upload/:id",
         method: "post",
-        handler:[auctionEventController.addIcon]
+        handler:[s3UploadMulter.single('file'),auctionEventController.addIcon]
     },
     {
         path: "/auctionevent/coverImage/upload/:id",
         method: "post",
-        handler: [auctionEventController.addCoverImage]
+        handler: [s3UploadMulter.single('file'),auctionEventController.addCoverImage]
     }
 ];
 

@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import { commonConfig } from "../../config";
 import { IUser } from "./user.interface";
 import { IUserModel } from "./user.schema";
+import { HTTP400Error } from "../../lib/utils/httpErrors";
 
 class UserController {
   public fetchAll = async (req: Request, res: Response, next: NextFunction) => {
@@ -98,34 +99,30 @@ class UserController {
       let data = await userModel.loginViaSocialAccessToken(req.query);
 
       // if user never existed then make user and save it to database
-      if (data && !data.isExisted) {
-        let user: any = {};
-        if (req.query.authProvider == 'google') {
-          user = {
-            firstName: data.given_name,
-            lastName: data.family_name,
-            email: data.email
-          }
-        } else if (req.query.authProvider == 'facebook') {
-          user = {
-            firstName: data.first_name,
-            lastName: data.last_name,
-            facebookId: data.id
-          }
-        }
-        
-        if (user) {
-          req.body.user = user;
-          this.signUp(req, res, next);
-        }
-      } else {
-        console.log(data);
-        const user = {
-          user: data._doc,
-          alreadyExisted:true
-        }
-        this.createSendToken(req, res, next, user);
-      }
+      responseHandler.reqRes(req, res).onCreate("Sign up Complete", data).send();
+    } catch (e) {
+      next(responseHandler.sendError(e));
+    }
+  };
+
+  public socialAuthAddPhone = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+    try {
+      responseHandler.reqRes(req, res).onFetch(`Phone Number added`, await userModel.addPhone(req.query)).send();
+    } catch (e) {
+      next(responseHandler.sendError(e));
+    }
+  };
+
+  public verifyOtp = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+    try {
+      const data = await userModel.verifyOtp(req.params.id, +req.query.otp);
+      // res.set('X-Auth', data.token);
+      responseHandler
+        .reqRes(req, res)
+        .onFetch("otp has been verified", data.token , "otp verified now you can go forward.")
+        .send();
     } catch (e) {
       next(responseHandler.sendError(e));
     }
@@ -170,49 +167,40 @@ class UserController {
     const responseHandler = new ResponseHandler();
 
     try {
-      let newUser:any
-      if (req.body.user) {
-        newUser = await userModel.add(req.body.user);
-      }else 
-      {
-        newUser = await userModel.add(req.body);
-      }
-      
+      const data = await userModel.signUp(req.body);
 
-      this.createSendToken(req, res, next, newUser);
+      responseHandler.reqRes(req, res).onCreate("Phone Number Added",data).send();
     } catch (e) {
-      responseHandler.sendError(e);
+      next(responseHandler.sendError(e));
     }
   };
 
-  private createSendToken = async (req: Request, res: Response, next: NextFunction, user: any) => {
-    const responseHandler = new ResponseHandler();
-    const token = this.signToken(user._id);
-    console.log("hiii");
-    const data = {
-      token,
-      user
-    };
-    responseHandler.reqRes(req, res).onCreate(msg.CREATED, data).send();
-  };
+  // private createSendToken = async (req: Request, res: Response, next: NextFunction, user: any) => {
+  //   const responseHandler = new ResponseHandler();
+  //   let ikcbalance = await userModel.fetchWalletBalance(user._id);
+  //   const token = this.signToken(user._id);
+  //   // console.log(ikcbalance);
+  //   // user.ikcbalance = ikcbalance;
+  //   console.log(user);
+  //   const data = {
+  //     token,
+  //     user,
+  //     ikcbalance
+  //   };
+  //   responseHandler.reqRes(req, res).onCreate(msg.CREATED, data).send();
+  // };
 
-  private signToken = (id: string) => {
-    return jwt.sign({ id }, commonConfig.jwtSecretKey, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    });
-  };
+  // private signToken = (id: string) => {
+  //   return jwt.sign({ id }, commonConfig.jwtSecretKey, {
+  //     expiresIn: process.env.JWT_EXPIRES_IN,
+  //   });
+  // };
 
   public logIn = async (req: Request, res: Response, next: NextFunction) => {
    const responseHandler = new ResponseHandler();
     try {
       const user = await userModel.login(req.body);
-      // 3> if eveything is ohkay send the token back
-      if (user) {
-        this.createSendToken(req, res, next, user);
-        // responseHandler.reqRes(req, res).send();
-      } else {
-        next(responseHandler.reqRes(req, res).send());
-      }
+        responseHandler.reqRes(req, res).onCreate('Login Successfully', user).send();
     } catch (e) {
       next(responseHandler.sendError(e));
     }
@@ -251,7 +239,7 @@ class UserController {
       const data = await userModel.isUserVerified(req.userId);
       
       if (!data.proceed) {
-        return responseHandler.reqRes(req, res).onFetch("User is not verified", data).send();
+        throw new HTTP400Error("User is Not Verified");
       } else {
         req.body.phone = data.phone;
       }
@@ -261,26 +249,60 @@ class UserController {
     }
   };
 
-  public verifyUser = async (req: Request, res: Response, next: NextFunction) => {
+  public generateOTP = async (req: Request, res: Response, next: NextFunction) => {
     const responseHandler = new ResponseHandler();
+
     try {
-      const otp = await userModel.genrateOTP(req.userId);
+      const otp = await userModel.genrateOTP(req.body.phone);
 
-      if (otp.proceed) {
-        const result = await userModel.verifyUser(otp.otp.toString(), req.userId);
-
-        if (result.proceed) {
-          responseHandler.reqRes(req, res).onCreate("User Verified", res).send();
-        } else {
-          throw Error("User Not Verified");
-        }
-      } else {
-        throw new Error("OTP not found");
-      }
+      responseHandler.reqRes(req, res).onCreate("OTP sent", otp).send();
     } catch (e) {
       next(responseHandler.sendError(e));
     }
-  };
+  }
+
+  public fetchWalletBalance = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+    try {
+      console.log(req.userId);
+      const data = await userModel.fetchWalletBalance(req.userId);
+
+      responseHandler.reqRes(req, res).onFetch("Here is wallet amount",data).send();
+    } catch (e) {
+      next(responseHandler.sendError(e))
+    }
+  }
+
+  public addPhoneNumber = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+    try {
+      const data = await userModel.addPhoneNumber(req.userId, req.query.phone);
+
+      responseHandler.reqRes(req, res).onCreate("OTP Updated", data).send();
+    } catch (e) {
+      next(responseHandler.sendError(e));
+    }
+  }
+
+  // public verifyUser = async (req: Request, res: Response, next: NextFunction) => {
+  //   const responseHandler = new ResponseHandler();
+  //   try {
+
+  //     if (req.body.otp) {
+  //       const result = await userModel.verifyUser(req.body.otp.otp.toString(), req.userId);
+
+  //       if (result.proceed) {
+  //         responseHandler.reqRes(req, res).onCreate("User Verified", res).send();
+  //       } else {
+  //         throw Error("User Not Verified");
+  //       }
+  //     } else {
+  //       throw new Error("OTP not found");
+  //     }
+  //   } catch (e) {
+  //     next(responseHandler.sendError(e));
+  //   }
+  // };
 }
 
 export default new UserController();

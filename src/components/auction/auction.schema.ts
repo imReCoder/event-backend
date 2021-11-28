@@ -8,23 +8,36 @@ export interface IAuctionModel extends IAuction, Document {
 
 export const AuctionSchema: Schema = new Schema(
     {
+        auctionEventId: {
+            type: Schema.Types.ObjectId,
+            ref:"AuctionEvent"
+        },
         title: {
             type: String,
             required:true
         },
 
-        startDate: {
-            type: String,
+        images: [{
+            type:String
+        }],
+
+        description: {
+            type:String,
             required:true
         },
 
-        endDate: {
-            type: String,
-            required: true
-        },
+        // startDate: {
+        //     type: String,
+        //     required:true
+        // },
+
+        // endDate: {
+        //     type: String,
+        //     required: true
+        // },
 
         startingBid: {
-            type: String,
+            type: Number,
             required:true
         },
 
