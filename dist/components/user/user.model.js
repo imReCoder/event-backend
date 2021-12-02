@@ -401,7 +401,7 @@ class UserModel {
                 let data;
                 data = yield this.fetchOnOtp(id, otp);
                 if (!data) {
-                    throw new httpErrors_1.HTTP400Error("The otp you have provided is not correct");
+                    throw new httpErrors_1.HTTP400Error('The otp you have provided is not correct'); //Error("The otp you have provided is not correct");
                 }
                 if (data.phone !== '9876543219') {
                     this.updateOtp(id);
@@ -411,8 +411,7 @@ class UserModel {
                 return { data, token };
             }
             catch (e) {
-                console.log(e);
-                throw new httpErrors_1.HTTP400Error(e);
+                throw new httpErrors_1.HTTP400Error(e.message);
             }
         });
     }

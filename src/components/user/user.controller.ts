@@ -124,6 +124,7 @@ class UserController {
         .onFetch("otp has been verified", data.token , "otp verified now you can go forward.")
         .send();
     } catch (e) {
+      console.log(e.message);
       next(responseHandler.sendError(e));
     }
   };

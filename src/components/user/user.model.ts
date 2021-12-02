@@ -9,7 +9,8 @@ import { sendMessage } from "./../../lib/services/textlocal";
 import jwt from 'jsonwebtoken';
 import { ObjectID } from "bson";
 import { commonConfig } from "../../config";
-import { HTTP400Error, HTTP401Error } from "../../lib/utils/httpErrors";
+import { HTTP400Error, HTTP401Error, HTTPClientError } from "../../lib/utils/httpErrors";
+import HttpException from "../..//exceptions/HttpException";
 
 export class UserModel {
     public async fetchAll() {
@@ -380,7 +381,7 @@ export class UserModel {
       let data;
       data = await this.fetchOnOtp(id, otp);
       if (!data) {
-        throw new HTTP400Error("The otp you have provided is not correct");
+         throw new HTTP400Error('The otp you have provided is not correct'); //Error("The otp you have provided is not correct");
       }
       if (data.phone !== '9876543219') {
         this.updateOtp(id);
@@ -389,8 +390,7 @@ export class UserModel {
       const token = await this.addNewToken(id);
       return { data, token };
     } catch (e) {
-      console.log(e);
-      throw new HTTP400Error(e);
+      throw new HTTP400Error(e.message);
     }
   }
 

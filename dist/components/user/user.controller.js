@@ -120,6 +120,7 @@ class UserController {
                     .send();
             }
             catch (e) {
+                console.log(e.message);
                 next(responseHandler.sendError(e));
             }
         });
