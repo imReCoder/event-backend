@@ -129,6 +129,8 @@ class UserModel {
                     throw new httpErrors_1.HTTP400Error("Unable to Send OTP");
                 }
             }
+            console.log("No user exist with this phone number");
+            throw new httpErrors_1.HTTP400Error('No user exist with this phone number');
         });
     }
     isUserExist(body) {

@@ -181,7 +181,7 @@ class UserController {
     try {
       const data = await userModel.loginWithPhone(req.body);
 
-      responseHandler.reqRes(req, res).onCreate("Login Success",data).send();
+      responseHandler.reqRes(req, res).onCreate("Otp sent successfully",data).send();
     } catch (e) {
       next(responseHandler.sendError(e));
     }

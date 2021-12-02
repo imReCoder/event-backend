@@ -92,6 +92,7 @@ export class UserModel {
         throw new HTTP400Error("Unable to Send OTP");
       }
     }
+    console.log("No user exist with this phone number");
     throw new HTTP400Error('No user exist with this phone number');
   }
   

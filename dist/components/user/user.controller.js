@@ -169,7 +169,7 @@ class UserController {
             const responseHandler = new responseHandler_1.default();
             try {
                 const data = yield user_model_1.default.loginWithPhone(req.body);
-                responseHandler.reqRes(req, res).onCreate("Login Success", data).send();
+                responseHandler.reqRes(req, res).onCreate("Otp sent successfully", data).send();
             }
             catch (e) {
                 next(responseHandler.sendError(e));
