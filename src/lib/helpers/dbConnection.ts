@@ -19,6 +19,7 @@ class Connection {
 
   public mongoConnection() {
     const dbURL: any = this.mongoUrl;
+    
     connect(dbURL, this.mongoOption());
 
     connection.on('connected', () => {

@@ -82,11 +82,11 @@ export default [
   //   method: "post",
   //   handler:[userController.verifyUser]
   // },
-  {
-    path: "/user/addPhoneNumber",
-    method: "post",
-    handler:[userController.addPhoneNumber]
-  },
+  // {
+  //   path: "/user/addPhoneNumber",
+  //   method: "post",
+  //   handler:[userController.addPhoneNumber]
+  // },
   {
     path: "/user/:id/verify-otp",
     method: "get",

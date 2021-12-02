@@ -19,12 +19,12 @@ exports.UserSchema = new mongoose_1.Schema({
     firstName: {
         type: String,
         minlength: 2,
-        required: true
+        required: false
     },
     lastName: {
         type: String,
         minlength: 2,
-        required: true
+        required: false
     },
     username: {
         type: String,
@@ -32,12 +32,12 @@ exports.UserSchema = new mongoose_1.Schema({
         sparse: true
         //required: true,
     },
-    password: {
-        type: String,
-        select: false,
-        unique: true,
-        sparse: true
-    },
+    // password: {
+    //   type: String,
+    //   select: false,
+    //   unique: true,
+    //   sparse:true
+    // },
     email: {
         type: String,
         minlength: 3,

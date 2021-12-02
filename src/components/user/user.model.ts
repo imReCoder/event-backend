@@ -77,23 +77,36 @@ export class UserModel {
   };
 
   public async loginWithPhone(body:any){
-    console.log("login request",body);
-    let phonePresent = await this.isPhoneExist(body);
-    console.log(phonePresent);
-    if(phonePresent && phonePresent.present){
-      const otp = this.updateOtp(phonePresent.user._id);
-      console.log(otp);
-      let otpData;
-      otpData = await this.sendOtpToMobile(otp, body.phone);
-      console.log(otpData);
-      if (otpData.proceed) {
-        return { _id: phonePresent.user._id, isExisted: true };
-      } else {
-        throw new HTTP400Error("Unable to Send OTP");
-      }
+    console.log("login with phone request");
+    let existingUser:IUserModel = await this.isPhoneExist(body);
+    let newUser;
+    let userExisted = true;
+    console.log(existingUser);
+    if(!existingUser){
+      body.role = 'user';
+      body.isVerified = true;
+      newUser = await this.add(body);
+      userExisted = false;
     }
-    console.log("No user exist with this phone number");
-    throw new HTTP400Error('No user exist with this phone number');
+    const otpData = userExisted?await this.generateOTP(existingUser,body):await this.generateOTP(newUser,body);
+    if (otpData.proceed) {
+      if(userExisted){
+        return { _id: existingUser._id,isExisted:true };
+      }
+      return {_id:newUser._id,isExisted:false};
+
+    } else {
+      throw new HTTP400Error("Unable to Send OTP");
+    }
+    return 
+  }
+  
+  public async generateOTP(user:any,body:any){
+    const otp = this.updateOtp(user._id);
+    console.log(otp);
+    let otpData;
+    otpData = await this.sendOtpToMobile(otp, body.phone);
+    return otpData;
   }
   
   public async isUserExist(body: any) {
@@ -125,12 +138,12 @@ export class UserModel {
         throw new HTTP400Error('Please provide phone number');
       }
       // 2> check if user exist and password is correct
-      const user = await User.findOne({ phone: phone }).select('_id');
+      const user = await User.findOne({ phone: phone });
 
       if (user) {
-        return {present:true,user}
+        return user
       }
-      return {present:false,user:null}
+      return null
     } catch (e) {
       throw new HTTP400Error(e.message);
     }
@@ -307,6 +320,7 @@ export class UserModel {
   async sendOtpToMobile(otp: number, phone: string) {
     console.log(`send this ${otp} to ${phone}`);
     const message = `Your Polbol login OTP is ${otp}.`;
+    if(process.env.NODE_ENV == 'development') return {proceed:true};
     return sendMessage(phone, message);
   }
 

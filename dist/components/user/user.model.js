@@ -113,24 +113,37 @@ class UserModel {
     ;
     loginWithPhone(body) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("login request", body);
-            let phonePresent = yield this.isPhoneExist(body);
-            console.log(phonePresent);
-            if (phonePresent && phonePresent.present) {
-                const otp = this.updateOtp(phonePresent.user._id);
-                console.log(otp);
-                let otpData;
-                otpData = yield this.sendOtpToMobile(otp, body.phone);
-                console.log(otpData);
-                if (otpData.proceed) {
-                    return { _id: phonePresent.user._id, isExisted: true };
-                }
-                else {
-                    throw new httpErrors_1.HTTP400Error("Unable to Send OTP");
-                }
+            console.log("login with phone request");
+            let existingUser = yield this.isPhoneExist(body);
+            let newUser;
+            let userExisted = true;
+            console.log(existingUser);
+            if (!existingUser) {
+                body.role = 'user';
+                body.isVerified = true;
+                newUser = yield this.add(body);
+                userExisted = false;
             }
-            console.log("No user exist with this phone number");
-            throw new httpErrors_1.HTTP400Error('No user exist with this phone number');
+            const otpData = userExisted ? yield this.generateOTP(existingUser, body) : yield this.generateOTP(newUser, body);
+            if (otpData.proceed) {
+                if (userExisted) {
+                    return { _id: existingUser._id, isExisted: true };
+                }
+                return { _id: newUser._id, isExisted: false };
+            }
+            else {
+                throw new httpErrors_1.HTTP400Error("Unable to Send OTP");
+            }
+            return;
+        });
+    }
+    generateOTP(user, body) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const otp = this.updateOtp(user._id);
+            console.log(otp);
+            let otpData;
+            otpData = yield this.sendOtpToMobile(otp, body.phone);
+            return otpData;
         });
     }
     isUserExist(body) {
@@ -161,11 +174,11 @@ class UserModel {
                     throw new httpErrors_1.HTTP400Error('Please provide phone number');
                 }
                 // 2> check if user exist and password is correct
-                const user = yield user_schema_1.User.findOne({ phone: phone }).select('_id');
+                const user = yield user_schema_1.User.findOne({ phone: phone });
                 if (user) {
-                    return { present: true, user };
+                    return user;
                 }
-                return { present: false, user: null };
+                return null;
             }
             catch (e) {
                 throw new httpErrors_1.HTTP400Error(e.message);
@@ -353,6 +366,8 @@ class UserModel {
         return __awaiter(this, void 0, void 0, function* () {
             console.log(`send this ${otp} to ${phone}`);
             const message = `Your Polbol login OTP is ${otp}.`;
+            if (process.env.NODE_ENV == 'development')
+                return { proceed: true };
             return (0, textlocal_1.sendMessage)(phone, message);
         });
     }
