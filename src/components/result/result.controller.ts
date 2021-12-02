@@ -24,7 +24,7 @@ class ResultController {
         try {
             const data = await resultmodel.getNumberData(req.params.formId, req.query.questionId);
 
-            responseHandler.reqRes(req, res).onFetch("NUmber Question Data Fetched", data).send();
+            responseHandler.reqRes(req, res).onFetch("Number Question Data Fetched", data).send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }

@@ -299,15 +299,14 @@ export class UserModel {
   public async addNewToken(id:string) {
     // const responseHandler = new ResponseHandler();
     const user = await User.findById(id);
-    let ikcbalance = await this.fetchWalletBalance(id);
+    // let ikcbalance = await this.fetchWalletBalance(id);
     const token = this.signToken(id);
     // console.log(ikcbalance);
     // user.ikcbalance = ikcbalance;
     console.log(user);
     const data = {
       token,
-      user,
-      ikcbalance
+      user
     };
 
     return data;
