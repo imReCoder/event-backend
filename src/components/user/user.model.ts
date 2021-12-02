@@ -82,7 +82,6 @@ export class UserModel {
     let existingUser:IUserModel = await this.isPhoneExist(body);
     let newUser;
     let userExisted = true;
-    console.log(existingUser);
     if(!existingUser){
       body.role = 'user';
       body.isVerified = true;
