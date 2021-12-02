@@ -55,16 +55,16 @@ export class UserModel {
       // const user = await User.findOne({ phone: body.phone });
         body.role = 'user';
         let data = await this.add(body);
-        // const otp = this.updateOtp(data._id);
-        // console.log(otp);
-        // let otpData;
-        // otpData = await this.sendOtpToMobile(otp, body.phone);
-        // console.log(otpData);
-        // if (otpData.proceed) {
-        //   return { _id: data._id, isExisted: false };
-        // } else {
-        //   throw new HTTP400Error("Unable to Send OTP");
-        // }
+        const otp = this.updateOtp(data._id);
+        console.log(otp);
+        let otpData;
+        otpData = await this.sendOtpToMobile(otp, body.phone);
+        console.log(otpData);
+        if (otpData.proceed) {
+          return { _id: data._id, isExisted: false };
+        } else {
+          throw new HTTP400Error("Unable to Send OTP");
+        }
       
       const userData = await this.addNewToken(data._id);
 
@@ -75,6 +75,24 @@ export class UserModel {
       }
             
   };
+
+  public async loginWithPhone(body:any){
+    console.log("login request",body);
+    let phonePresent = await this.isPhoneExist(body);
+    console.log(phonePresent);
+    if(phonePresent && phonePresent.present){
+      const otp = this.updateOtp(phonePresent.user._id);
+      console.log(otp);
+      let otpData;
+      otpData = await this.sendOtpToMobile(otp, body.phone);
+      console.log(otpData);
+      if (otpData.proceed) {
+        return { _id: phonePresent.user._id, isExisted: true };
+      } else {
+        throw new HTTP400Error("Unable to Send OTP");
+      }
+    }
+  }
   
   public async isUserExist(body: any) {
     try {
@@ -95,6 +113,26 @@ export class UserModel {
     }
   }
 
+
+  public async isPhoneExist(body: any) {
+    try {
+      const { phone } = body;
+
+      // 1>  check email and password exist
+      if (!phone) {
+        throw new HTTP400Error('Please provide phone number');
+      }
+      // 2> check if user exist and password is correct
+      const user = await User.findOne({ phone: phone }).select('_id');
+
+      if (user) {
+        return {present:true,user}
+      }
+      return {present:false,user:null}
+    } catch (e) {
+      throw new HTTP400Error(e.message);
+    }
+  }
   public async login(body: any) {
     try {
       const { username, password } = body;

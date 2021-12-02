@@ -175,6 +175,18 @@ class UserController {
     }
   };
 
+  public loginWithPhone = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+
+    try {
+      const data = await userModel.loginWithPhone(req.body);
+
+      responseHandler.reqRes(req, res).onCreate("Login Success",data).send();
+    } catch (e) {
+      next(responseHandler.sendError(e));
+    }
+  };
+
   // private createSendToken = async (req: Request, res: Response, next: NextFunction, user: any) => {
   //   const responseHandler = new ResponseHandler();
   //   let ikcbalance = await userModel.fetchWalletBalance(user._id);

@@ -27,6 +27,12 @@ export default [
     escapeAuth:true,
     handler:[userController.logIn]
   },
+  {
+    path: "/login/phone",
+    method: "post",
+    escapeAuth: true,
+    handler: [userController.loginWithPhone]
+  },
   // {
   //   path: "/logout",
   //   method: "post",
@@ -99,6 +105,7 @@ export default [
     escapeAuth: true,
     handler: [userController.socialAuthAddPhone]
   },
+ 
 //   {
 //     path: "/user/:id/photos",
 //     method: "get",
