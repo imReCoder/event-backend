@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import eventPortfolio from "./eventPortfolio.model";
 import ResponseHandler from "../../lib/helpers/responseHandler";
 import { user as msg } from "../../lib/helpers/customMessage";
+import { eventPortfolio as eventPortfolioMsg } from "../../lib/helpers/customMessage";
 import jwt from 'jsonwebtoken';
 import { commonConfig } from "../../config";
 import { IEventPortfolio } from "./eventPortfolio.interface";
@@ -30,7 +31,7 @@ class EventPortfolioController {
             // res.set("X-Auth")
             responseHandler
                 .reqRes(req, res)
-                .onCreate(msg.CREATED, await eventPortfolio.add(req.body), msg.CREATED_DEC)
+                .onCreate(eventPortfolioMsg.CREATED, await eventPortfolio.add(req.body), eventPortfolioMsg.CREATED_DEC)
                 .send();
         } catch (e) {
             console.log(e);

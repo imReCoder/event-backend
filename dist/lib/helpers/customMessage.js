@@ -7,7 +7,7 @@
 || You will everything at one place
 ------------------------------------------------*/
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.wallet = exports.score = exports.quiz = exports.ques = exports.likes = exports.comments = exports.award = exports.poll = exports.channel = exports.region = exports.competition = exports.post = exports.specialization = exports.user = void 0;
+exports.wallet = exports.score = exports.quiz = exports.ques = exports.likes = exports.comments = exports.award = exports.poll = exports.channel = exports.region = exports.competition = exports.post = exports.specialization = exports.eventPortfolio = exports.ticketMsg = exports.user = void 0;
 /**
  * Feedback component custom messages.
  */
@@ -16,6 +16,17 @@ exports.user = {
     CREATED_DEC: `This user has been created with the some scenario so adding some description.`,
     FETCH_ALL: `Hurray, Here is you all users.`,
     UPDATED: "Hurray! Your profile has been successfully updated"
+};
+exports.ticketMsg = {
+    CREATED: "New Ticket Created",
+    CREATED_DEC: "New Ticket has been generated successfully",
+    UPDATED: "Ticket update successfully",
+    FETCH: "Tickets fetched successfully",
+    DELETED: "Ticket deleted"
+};
+exports.eventPortfolio = {
+    CREATED: "Event Portfolio Created",
+    CREATED_DEC: `New Evene Portfolio has been created successfully`,
 };
 exports.specialization = {
     CREATED: "Hurray! new specialization has been created successfully",

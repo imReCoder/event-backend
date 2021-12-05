@@ -1,17 +1,41 @@
 // import { Interface } from "readline";
 
 export interface IEvent {
-    title: string;
-    amount: string;
+    name: string;
+    displayName:string,
+    visibility: EventVisibility;
     startDate: Date;
     endDate: Date;
-    type: string;
-    creator: string,
-    eventPortfolio: string;
-    information: string;
-    gallery: Array<string>;
-    venue: string;
-    organizer: number;
+    startTime:string,
+    endTime:string,
+    location:EventLocation,
+    images:EventImages,
+    description:string,
+    repeating:boolean,
+    repeatingPeriod:string,
+    repeatingExceptionDays:Date[],
+    containsTimeSlots:boolean,
+    timeSlots:EventTimeSlots,
+    ticketId:string,
+    creator:string,
     createdAt:Date;
     updatedAt: Date;
+    tickets:String[]
+}
+
+enum EventVisibility{
+    PRIVATE,
+    PUBLIC
+}
+interface EventLocation{
+    venue:string,
+    fullAddress:string
+}
+interface EventImages{
+    desktopImage:string,
+    mobileImage:string
+}
+interface EventTimeSlots{
+    from:string,
+    to:string
 }

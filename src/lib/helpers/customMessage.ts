@@ -17,6 +17,18 @@ export let user = {
   UPDATED: "Hurray! Your profile has been successfully updated"
 };
 
+export let ticketMsg = {
+  CREATED:"New Ticket Created",
+  CREATED_DEC:"New Ticket has been generated successfully",
+  UPDATED:"Ticket update successfully",
+  FETCH:"Tickets fetched successfully",
+  DELETED:"Ticket deleted"
+}
+
+export let eventPortfolio = {
+  CREATED: "Event Portfolio Created",
+  CREATED_DEC: `New Evene Portfolio has been created successfully`,
+}
 export let specialization = {
   CREATED: "Hurray! new specialization has been created successfully",
   CREATED_DEC: `This specialization has been created with the some scenario so adding some description.`,

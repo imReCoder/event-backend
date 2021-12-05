@@ -11,24 +11,33 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Event = exports.EventSchema = void 0;
 const mongoose_1 = require("mongoose");
+const LocationSchema = new mongoose_1.Schema({
+    venu: { type: String },
+    fullAddress: { type: String }
+});
+const EventImageSchema = new mongoose_1.Schema({
+    desktopImage: {
+        type: String
+    },
+    mobileImage: {
+        type: String
+    }
+});
 exports.EventSchema = new mongoose_1.Schema({
-    title: {
+    name: {
         type: String,
         minlength: 2,
         required: true
     },
-    amount: {
+    displayName: {
         type: String,
         required: true
     },
-    category: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: "Category"
+    visibility: {
+        type: String,
+        enum: ["PRIVATE", "PUBLIC"],
+        description: "visibility must be PUBLIC or PRIVATE"
     },
-    information: {
-        type: String
-    },
-    gallery: [String],
     startDate: {
         type: Date,
         required: true
@@ -37,10 +46,39 @@ exports.EventSchema = new mongoose_1.Schema({
         type: Date,
         required: true
     },
+    location: {
+        type: LocationSchema
+    },
+    images: {
+        type: EventImageSchema
+    },
+    //new fields
+    timeZone: {
+        type: String
+    },
+    repeatingEvent: {
+        type: Boolean
+    },
+    repeatingPeriod: {
+        type: String
+    },
+    repeatingExceptionDays: {
+        type: Array
+    },
+    containsTimeSlots: {
+        type: Boolean
+    },
+    timeSlots: {
+        trk: [{
+                from: String,
+                to: String
+            }]
+    },
     type: {
         type: String,
-        enum: ["online", "physical", "virtual"],
-        required: true
+        enum: ["ONLINE", "PHYSICAL", "VIRTUAL"],
+        required: true,
+        description: "type must be ONLINE,PHYSICAL,VIRTUAL"
     },
     likes: {
         type: Number,
@@ -52,25 +90,15 @@ exports.EventSchema = new mongoose_1.Schema({
     },
     isFreebie: {
         type: Boolean,
-        required: true
     },
     creator: {
         type: String,
         ref: "User"
     },
-    eventPortfolioId: {
-        type: String,
-        ref: "EventPortfolio"
-    },
-    onlinePlatform: {
-        type: String
-    },
-    venuePlace: {
-        type: String,
-    },
-    venueLocation: {
-        type: String
-    }
+    tickets: [{
+            type: mongoose_1.Schema.Types.ObjectId,
+            ref: "Tickets"
+        }]
 }, {
     timestamps: true
 });

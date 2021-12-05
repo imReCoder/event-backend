@@ -29,15 +29,15 @@ class EventController {
             console.log(req.body);
             const result = await eventModel.add(req.body, req.userId);
 
-            if (result.data && !result.alreadyExisted) {
-                const data = await Category.addEventCount(req.body.category);
-                if (!data.success) {
-                    throw new Error("Category event count not increased");
-                }
+            // if (result.data && !result.alreadyExisted) {
+            //     const data = await Category.addEventCount(req.body.category);
+            //     if (!data.success) {
+            //         throw new Error("Category event count not increased");
+            //     }
+            // } 
                 req.params.id = req.body.eventPortfolioId;
                 req.params.eventId = result.data._id;
                 next();
-            } 
             // res.set("X-Auth")
         } catch (e) {
             console.log(e);
@@ -95,6 +95,7 @@ class EventController {
             const data = await eventModel.fetchEventsForUser(req.query);
             responseHandler.reqRes(req, res).onFetch("Events Fetched",data).send();
         } catch (e) {
+            console.log(e);
             responseHandler.sendError(e);
         }
     }

@@ -59,7 +59,23 @@ export class EventModel {
           throw new HTTP400Error(e);
         }
     };
+    
+    public async addTicket(ticketId:string,eventId:string){
+      try{
 
+        const eventData = await Event.findByIdAndUpdate({ _id: eventId },{
+          $addToSet: { "tickets": ticketId}
+        }, {
+          runValidators: true,
+          new: true
+        });
+        console.log("event data is ",eventData);
+        return eventData;
+      }catch(e){
+        throw new HTTP400Error(e);
+      }
+        
+    }
     public async fetchEventsForUser(condition:any) {
         try {
             const sortArgument = {createdAt: -1};

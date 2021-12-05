@@ -66,6 +66,23 @@ class EventModel {
         });
     }
     ;
+    addTicket(ticketId, eventId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const eventData = yield event_schema_1.Event.findByIdAndUpdate({ _id: eventId }, {
+                    $addToSet: { "tickets": ticketId }
+                }, {
+                    runValidators: true,
+                    new: true
+                });
+                console.log("event data is ", eventData);
+                return eventData;
+            }
+            catch (e) {
+                throw new httpErrors_1.HTTP400Error(e);
+            }
+        });
+    }
     fetchEventsForUser(condition) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

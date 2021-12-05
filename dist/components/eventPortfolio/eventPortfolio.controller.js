@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const eventPortfolio_model_1 = __importDefault(require("./eventPortfolio.model"));
 const responseHandler_1 = __importDefault(require("../../lib/helpers/responseHandler"));
 const customMessage_1 = require("../../lib/helpers/customMessage");
+const customMessage_2 = require("../../lib/helpers/customMessage");
 const event_model_1 = __importDefault(require("../event/event.model"));
 class EventPortfolioController {
     constructor() {
@@ -36,7 +37,7 @@ class EventPortfolioController {
                 // res.set("X-Auth")
                 responseHandler
                     .reqRes(req, res)
-                    .onCreate(customMessage_1.user.CREATED, yield eventPortfolio_model_1.default.add(req.body), customMessage_1.user.CREATED_DEC)
+                    .onCreate(customMessage_2.eventPortfolio.CREATED, yield eventPortfolio_model_1.default.add(req.body), customMessage_2.eventPortfolio.CREATED_DEC)
                     .send();
             }
             catch (e) {
