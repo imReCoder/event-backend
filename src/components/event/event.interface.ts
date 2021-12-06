@@ -13,15 +13,19 @@ export interface IEvent {
     description:string,
     repeating:boolean,
     repeatingPeriod:string,
+    repeatingTime:RepeatingTime[],
+    repeatEveryWeekOn:string[],
     repeatingExceptionDays:Date[],
+    repeatingEndsOn:string,
     containsTimeSlots:boolean,
-    timeSlots:EventTimeSlots,
+    timeSlots:EventTimeSlots[],
     ticketId:string,
     creator:string,
     createdAt:Date;
     updatedAt: Date;
     tickets:String[]
 }
+
 
 enum EventVisibility{
     PRIVATE,
@@ -36,6 +40,11 @@ interface EventImages{
     mobileImage:string
 }
 interface EventTimeSlots{
+    from:string,
+    to:string
+}
+
+interface RepeatingTime{
     from:string,
     to:string
 }

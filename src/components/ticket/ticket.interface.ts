@@ -12,6 +12,11 @@ export interface ITicket{
     maximumPerBooking:Number,
     GSTInvoice:boolean,
     GSTNumber:string,
+    townScriptFeePayer:string,
+    paymentGatewayFeePayer:FEEPAYER,
+    ticketDescription:string
+    msgToAttendee:string,
+    currency:string,
     creator:string,
     eventId:string
 }
@@ -20,4 +25,8 @@ enum TicketType{
     PAID,
     FREE,
     DONATION
+}
+enum FEEPAYER{
+    ME,
+    BUYER
 }

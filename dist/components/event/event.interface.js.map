@@ -1,1 +1,1 @@
-{"version":3,"file":"event.interface.js","sourceRoot":"","sources":["../../../src/components/event/event.interface.ts"],"names":[],"mappings":";AAAA,wCAAwC;;AAyBxC,IAAK,eAGJ;AAHD,WAAK,eAAe;IAChB,2DAAO,CAAA;IACP,yDAAM,CAAA;AACV,CAAC,EAHI,eAAe,KAAf,eAAe,QAGnB"}
+{"version":3,"file":"event.interface.js","sourceRoot":"","sources":["../../../src/components/event/event.interface.ts"],"names":[],"mappings":";AAAA,wCAAwC;;AA6BxC,IAAK,eAGJ;AAHD,WAAK,eAAe;IAChB,2DAAO,CAAA;IACP,yDAAM,CAAA;AACV,CAAC,EAHI,eAAe,KAAf,eAAe,QAGnB"}

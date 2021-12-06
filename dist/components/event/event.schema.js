@@ -17,10 +17,10 @@ const LocationSchema = new mongoose_1.Schema({
 });
 const EventImageSchema = new mongoose_1.Schema({
     desktopImage: {
-        type: String
+        type: Buffer
     },
     mobileImage: {
-        type: String
+        type: Buffer
     }
 });
 exports.EventSchema = new mongoose_1.Schema({
@@ -42,19 +42,27 @@ exports.EventSchema = new mongoose_1.Schema({
         type: Date,
         required: true
     },
+    startTime: {
+        type: String
+    },
     endDate: {
         type: Date,
         required: true
     },
+    endTime: {
+        type: String
+    },
     location: {
-        type: LocationSchema
+        type: LocationSchema,
+        required: true
     },
     images: {
         type: EventImageSchema
     },
     //new fields
     timeZone: {
-        type: String
+        type: String,
+        required: true
     },
     repeatingEvent: {
         type: Boolean
@@ -62,8 +70,23 @@ exports.EventSchema = new mongoose_1.Schema({
     repeatingPeriod: {
         type: String
     },
+    repeatingTime: {
+        trk: [{
+                from: String,
+                to: String
+            }]
+    },
+    repeatEveryWeekOn: {
+        type: [String]
+    },
     repeatingExceptionDays: {
-        type: Array
+        type: [Date]
+    },
+    repeatOccursOn: {
+        type: [Date]
+    },
+    repeatingEndsOn: {
+        type: String
     },
     containsTimeSlots: {
         type: Boolean
@@ -73,6 +96,10 @@ exports.EventSchema = new mongoose_1.Schema({
                 from: String,
                 to: String
             }]
+    },
+    description: {
+        type: String,
+        required: true
     },
     type: {
         type: String,

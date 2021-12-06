@@ -49,6 +49,8 @@ class TicketModel {
     fetch(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const data = ticket_schema_1.Ticket.findById(id);
+            if (!data)
+                throw new httpErrors_1.HTTP400Error("Ticket Not Found");
             return data;
         });
     }

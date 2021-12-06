@@ -72,6 +72,24 @@ exports.TicketSchema = new mongoose_1.Schema({
         minlength: 15,
         description: "GST must be of 15 characters"
     },
+    townScriptFeePayer: {
+        type: String,
+        enum: ['ME', 'BUYER']
+    },
+    paymentGatewayFeePayer: {
+        type: String,
+        enum: ["ME", "BUYER"]
+    },
+    ticketDescription: {
+        type: String
+    },
+    msgToAttendee: {
+        type: String
+    },
+    currency: {
+        type: String,
+        required: true
+    },
     creator: {
         type: String,
         ref: "User"

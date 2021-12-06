@@ -49,6 +49,14 @@ export class EventModel {
             body.creator = userId;
             body.startDate = new Date(body.startDate);
             body.endDate = new Date(body.endDate);
+            if(body.repeatingExceptionDays){
+            const repeatingExceptionDays = body.repeatingExceptionDays;
+            if(repeatingExceptionDays.length){
+              for(let i=0;i<repeatingExceptionDays.length;i++){
+                body.repeatingExceptionDays[i]=new Date(repeatingExceptionDays[i]);
+              }
+            }
+          }
             const q: IEventModel = new Event(body);
             // await likeModel.add(q._id);
             console.log("hiii", q);
@@ -56,7 +64,7 @@ export class EventModel {
             console.log(data);
             return { data, alreadyExisted: false };
         } catch (e) {
-          throw new HTTP400Error(e);
+          throw new HTTP400Error(e.message);
         }
     };
     

@@ -39,6 +39,7 @@ export class TicketModel{
 
         public async fetch(id: string) {
             const data = Ticket.findById(id);
+            if(!data) throw new HTTP400Error("Ticket Not Found");
             return data;
         }
 

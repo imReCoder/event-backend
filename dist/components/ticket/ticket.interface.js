@@ -6,4 +6,9 @@ var TicketType;
     TicketType[TicketType["FREE"] = 1] = "FREE";
     TicketType[TicketType["DONATION"] = 2] = "DONATION";
 })(TicketType || (TicketType = {}));
+var FEEPAYER;
+(function (FEEPAYER) {
+    FEEPAYER[FEEPAYER["ME"] = 0] = "ME";
+    FEEPAYER[FEEPAYER["BUYER"] = 1] = "BUYER";
+})(FEEPAYER || (FEEPAYER = {}));
 //# sourceMappingURL=ticket.interface.js.map

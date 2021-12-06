@@ -53,6 +53,14 @@ class EventModel {
                 body.creator = userId;
                 body.startDate = new Date(body.startDate);
                 body.endDate = new Date(body.endDate);
+                if (body.repeatingExceptionDays) {
+                    const repeatingExceptionDays = body.repeatingExceptionDays;
+                    if (repeatingExceptionDays.length) {
+                        for (let i = 0; i < repeatingExceptionDays.length; i++) {
+                            body.repeatingExceptionDays[i] = new Date(repeatingExceptionDays[i]);
+                        }
+                    }
+                }
                 const q = new event_schema_1.Event(body);
                 // await likeModel.add(q._id);
                 console.log("hiii", q);
@@ -61,7 +69,7 @@ class EventModel {
                 return { data, alreadyExisted: false };
             }
             catch (e) {
-                throw new httpErrors_1.HTTP400Error(e);
+                throw new httpErrors_1.HTTP400Error(e.message);
             }
         });
     }
