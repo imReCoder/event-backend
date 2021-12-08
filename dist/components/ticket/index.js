@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ticket_controller_1 = __importDefault(require("./ticket.controller"));
 exports.default = [
     {
-        path: "/ticket/create",
+        path: "/ticket/create/:eventId",
         method: "post",
         handler: [ticket_controller_1.default.create]
     },

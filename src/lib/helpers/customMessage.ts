@@ -24,6 +24,15 @@ export let ticketMsg = {
   FETCH:"Tickets fetched successfully",
   DELETED:"Ticket deleted"
 }
+export let formMsg = {
+  CREATED:"New Form Created",
+  CREATED_DEC:"New Form has been generated successfully",
+  UPDATED:"Form update successfully",
+  FETCH:"Form fetched successfully",
+  FETCH_ALL:"All Forms fetched successfully",
+
+  DELETED:"Form deleted"
+}
 
 export let eventPortfolio = {
   CREATED: "Event Portfolio Created",

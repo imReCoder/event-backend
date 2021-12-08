@@ -23,20 +23,30 @@ exports.FormSchema = new mongoose_1.Schema({
     },
     creator: {
         type: mongoose_1.Schema.Types.ObjectId,
-        ref: "User"
+        ref: "User",
     },
     eventId: {
-        type: String,
-        required: true
+        type: mongoose_1.Schema.Types.ObjectId,
+        required: true,
+        ref: "Event"
     },
     questions: [{
-            questionText: String,
-            questionImage: { type: String, default: "" },
-            isRequired: Boolean,
-            questiontype: String,
+            questionText: { type: String, required: true },
+            questionImage: { type: Buffer, default: "" },
+            isRequired: { type: Boolean, required: true },
+            questiontype: {
+                type: String,
+                required: true,
+                enum: ['MCQ', 'DROPDOWN', 'TEXT_INPUT', 'PARAGRAPH', "RADIO_BUTTON", "NUMBER"]
+            },
+            forAllTickets: Boolean,
+            seletedTickets: {
+                type: [mongoose_1.Schema.Types.ObjectId],
+                ref: "Ticket"
+            },
             options: [{
                     optionText: String,
-                    optionImage: { type: String, default: "" },
+                    optionImage: { type: Buffer, default: "" },
                 }]
         }],
 }, {

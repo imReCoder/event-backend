@@ -11,7 +11,9 @@ class TicketController{
         public  create = async(req:Request,res:Response,next:NextFunction)=>{
             const responseHandler = new ResponseHandler();
             try{
-                console.log(req.body,req.userId);
+                console.log(`Creating new ticket for event :${req.params.eventId}`);
+                
+                req.body.eventId = req.params.eventId
                 const newTicket = await ticketModel.create(req.body,req.userId);
                 if(!newTicket || !newTicket._id) throw Error("some error occured...");
                 const updateEventData = await eventModel.addTicket(newTicket._id,newTicket.eventId);

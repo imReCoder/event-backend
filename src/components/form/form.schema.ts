@@ -19,22 +19,32 @@ export const FormSchema: Schema = new Schema(
         
         creator: {
             type: Schema.Types.ObjectId,
-            ref: "User"
+            ref: "User",
         },
 
         eventId: {
-            type: String,
-            required:true
+            type: Schema.Types.ObjectId,
+            required:true,
+            ref:"Event"
         },
         
         questions: [{
-            questionText: String,
-            questionImage: { type: String, default: "" },
-            isRequired: Boolean,
-            questiontype:String,
+            questionText: {type:String,required:true},
+            questionImage: { type: Buffer, default: "" },
+            isRequired: {type:Boolean,required:true},
+            questiontype:{
+                type:String,
+                required:true,
+                enum:['MCQ','DROPDOWN','TEXT_INPUT','PARAGRAPH',"RADIO_BUTTON","NUMBER"]
+            },
+            forAllTickets:Boolean,
+            seletedTickets:{
+                type:[Schema.Types.ObjectId],
+                ref:"Ticket"
+            },
             options: [{
                 optionText: String,
-                optionImage: { type: String, default: "" },
+                optionImage: { type: Buffer, default: "" },
             }]
         }],
     },

@@ -3,7 +3,7 @@ import { s3UploadMulter } from "../../lib/services/s3";
 
 export default [
     {
-        path: "/ticket/create",
+        path: "/ticket/create/:eventId",
         method: "post",
         handler:[ticketController.create]
     },

@@ -22,7 +22,8 @@ class TicketController {
         this.create = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const responseHandler = new responseHandler_1.default();
             try {
-                console.log(req.body, req.userId);
+                console.log(`Creating new ticket for event :${req.params.eventId}`);
+                req.body.eventId = req.params.eventId;
                 const newTicket = yield ticket_model_1.default.create(req.body, req.userId);
                 if (!newTicket || !newTicket._id)
                     throw Error("some error occured...");

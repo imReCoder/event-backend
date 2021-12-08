@@ -36,10 +36,8 @@ export class FormModel {
 
     public async add(body: IFormModel, eventId:string) {
         try {
-            // console.log(body);
             body.eventId = eventId;
             const q: IFormModel = new Form(body);
-            // console.log("hiii", q);
             await resultModel.createResultBody(q);
             const data: IFormModel = await q.addNewForm();
             console.log(data);

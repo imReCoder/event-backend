@@ -16,12 +16,13 @@ const form_model_1 = __importDefault(require("./form.model"));
 const responseHandler_1 = __importDefault(require("../../lib/helpers/responseHandler"));
 const customMessage_1 = require("../../lib/helpers/customMessage");
 const result_model_1 = __importDefault(require("../result/result.model"));
+const customMessage_2 = require("../../lib/helpers/customMessage");
 class FormController {
     constructor() {
         this.fetchAll = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const responseHandler = new responseHandler_1.default();
             try {
-                responseHandler.reqRes(req, res).onFetch(customMessage_1.user.FETCH_ALL, yield form_model_1.default.fetchAll()).send();
+                responseHandler.reqRes(req, res).onFetch(customMessage_2.formMsg.FETCH_ALL, yield form_model_1.default.fetchAll()).send();
             }
             catch (e) {
                 // send error with next function.
@@ -36,7 +37,7 @@ class FormController {
                 // res.set("X-Auth")
                 responseHandler
                     .reqRes(req, res)
-                    .onCreate(customMessage_1.user.CREATED, yield form_model_1.default.add(req.body, req.params.eventId), customMessage_1.user.CREATED_DEC)
+                    .onCreate(customMessage_2.formMsg.CREATED, yield form_model_1.default.add(req.body, req.params.eventId), customMessage_2.formMsg.CREATED_DEC)
                     .send();
             }
             catch (e) {
@@ -47,7 +48,7 @@ class FormController {
         this.fetch = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const responseHandler = new responseHandler_1.default();
             try {
-                responseHandler.reqRes(req, res).onCreate(customMessage_1.user.CREATED, yield form_model_1.default.fetch(req.params.id), customMessage_1.user.CREATED_DEC).send();
+                responseHandler.reqRes(req, res).onCreate(customMessage_2.formMsg.FETCH, yield form_model_1.default.fetch(req.params.id), customMessage_1.user.CREATED_DEC).send();
             }
             catch (e) {
                 next(responseHandler.sendError(e));
@@ -65,7 +66,7 @@ class FormController {
         this.update = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const responseHandler = new responseHandler_1.default();
             try {
-                responseHandler.reqRes(req, res).onCreate(customMessage_1.user.UPDATED, yield form_model_1.default.update(req.params.id, req.body)).send();
+                responseHandler.reqRes(req, res).onCreate(customMessage_2.formMsg.UPDATED, yield form_model_1.default.update(req.params.id, req.body)).send();
             }
             catch (e) {
                 next(responseHandler.sendError(e));
@@ -75,7 +76,7 @@ class FormController {
             const responseHandler = new responseHandler_1.default();
             try {
                 yield form_model_1.default.delete(req.params.id);
-                responseHandler.reqRes(req, res).onCreate(customMessage_1.user.UPDATED).send();
+                responseHandler.reqRes(req, res).onCreate(customMessage_2.formMsg.UPDATED).send();
             }
             catch (e) {
                 next(responseHandler.sendError(e));

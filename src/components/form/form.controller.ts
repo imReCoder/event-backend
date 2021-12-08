@@ -6,12 +6,12 @@ import { commonConfig } from "../../config";
 import { IForm } from "./form.interface";
 import { IFormModel } from "./form.schema";
 import resultModel from "../result/result.model";
-
+import { formMsg } from "../../lib/helpers/customMessage";
 class FormController {
     public fetchAll = async (req: Request, res: Response, next: NextFunction) => {
         const responseHandler = new ResponseHandler();
         try {
-            responseHandler.reqRes(req, res).onFetch(msg.FETCH_ALL, await formmodel.fetchAll()).send();
+            responseHandler.reqRes(req, res).onFetch(formMsg.FETCH_ALL, await formmodel.fetchAll()).send();
         } catch (e) {
             // send error with next function.
             next(responseHandler.sendError(e));
@@ -28,7 +28,7 @@ class FormController {
             // res.set("X-Auth")
             responseHandler
                 .reqRes(req, res)
-                .onCreate(msg.CREATED, await formmodel.add(req.body,req.params.eventId), msg.CREATED_DEC)
+                .onCreate(formMsg.CREATED, await formmodel.add(req.body,req.params.eventId), formMsg.CREATED_DEC)
                 .send();
         } catch (e) {
             console.log(e);
@@ -39,7 +39,7 @@ class FormController {
     public fetch = async (req: Request, res: Response, next: NextFunction) => {
         const responseHandler = new ResponseHandler();
         try {
-            responseHandler.reqRes(req, res).onCreate(msg.CREATED, await formmodel.fetch(req.params.id), msg.CREATED_DEC).send();
+            responseHandler.reqRes(req, res).onCreate(formMsg.FETCH, await formmodel.fetch(req.params.id), msg.CREATED_DEC).send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }
@@ -58,7 +58,7 @@ class FormController {
     public update = async (req: Request, res: Response, next: NextFunction) => {
         const responseHandler = new ResponseHandler();
         try {
-            responseHandler.reqRes(req, res).onCreate(msg.UPDATED, await formmodel.update(req.params.id, req.body)).send();
+            responseHandler.reqRes(req, res).onCreate(formMsg.UPDATED, await formmodel.update(req.params.id, req.body)).send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }
@@ -69,7 +69,7 @@ class FormController {
 
         try {
             await formmodel.delete(req.params.id);
-            responseHandler.reqRes(req, res).onCreate(msg.UPDATED).send();
+            responseHandler.reqRes(req, res).onCreate(formMsg.UPDATED).send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }

@@ -47,10 +47,8 @@ class FormModel {
     add(body, eventId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // console.log(body);
                 body.eventId = eventId;
                 const q = new form_schema_1.Form(body);
-                // console.log("hiii", q);
                 yield result_model_1.default.createResultBody(q);
                 const data = yield q.addNewForm();
                 console.log(data);
