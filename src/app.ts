@@ -52,7 +52,7 @@ const r1 = express.Router();
 //   await quizModel.distributePriceMoney();
 // });
 
-app.use("/", applyRoutes(routes, r1)); // default api
+app.use("/ikcdeal", applyRoutes(routes, r1)); // default api
 app.all("*", (req, res, next) => {
   // res.send("hii");
   next(new HTTP400Error(`Can't found ${req.originalUrl} on ikcdeal server`));

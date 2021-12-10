@@ -48,7 +48,7 @@ const r1 = express_1.default.Router();
 //   console.log("Running job 2......");
 //   await quizModel.distributePriceMoney();
 // });
-app.use("/", (0, utils_1.applyRoutes)(routes_1.default, r1)); // default api
+app.use("/ikcdeal", (0, utils_1.applyRoutes)(routes_1.default, r1)); // default api
 app.all("*", (req, res, next) => {
     // res.send("hii");
     next(new httpErrors_1.HTTP400Error(`Can't found ${req.originalUrl} on ikcdeal server`));
