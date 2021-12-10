@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.app = void 0;
+const httpErrors_1 = require("./lib/utils/httpErrors");
 const express_1 = __importDefault(require("express"));
 /* Custom imports */
 const utils_1 = require("./lib/utils");
@@ -48,6 +49,10 @@ const r1 = express_1.default.Router();
 //   await quizModel.distributePriceMoney();
 // });
 app.use("/", (0, utils_1.applyRoutes)(routes_1.default, r1)); // default api
+app.all("*", (req, res, next) => {
+    // res.send("hii");
+    next(new httpErrors_1.HTTP400Error(`Can't found ${req.originalUrl} on ikcdeal server`));
+});
 /*---------------------------------------
 | API VERSIONS CONFIGURATION [END]
 |---------------------------------------*/

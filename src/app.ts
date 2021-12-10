@@ -1,3 +1,4 @@
+import { HTTP400Error } from './lib/utils/httpErrors';
 import express from "express";
 /* Custom imports */
 import {applyMiddleware, applyRoutes} from "./lib/utils";
@@ -52,7 +53,10 @@ const r1 = express.Router();
 // });
 
 app.use("/", applyRoutes(routes, r1)); // default api
-
+app.all("*", (req, res, next) => {
+  // res.send("hii");
+  next(new HTTP400Error(`Can't found ${req.originalUrl} on ikcdeal server`));
+});
 /*---------------------------------------
 | API VERSIONS CONFIGURATION [END]
 |---------------------------------------*/
