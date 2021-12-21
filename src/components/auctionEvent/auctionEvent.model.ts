@@ -14,7 +14,7 @@ import axios from "axios";
 import transactionModel from "../transactions/transaction.model";
 import { Transaction } from "../transactions/transaction.schema";
 const fieldsOfUser = 'image firstName';
-const defaults = 'title starDate endDate description type auctionItems createdAt updatedAt icon coverImage'
+const defaults = 'title startTime endTime description type auctionItems createdAt updatedAt icon coverImage'
 export class AuctionEventModel {
     public async fetchAll(body:any) {
         console.log("fetch all for type ",body.type);
@@ -34,7 +34,9 @@ export class AuctionEventModel {
 
     public async fetch(id: string) {
         const conidtion = {_id:new ObjectID(id)};
-        const data = this.fetchAuctionEventByCondition(conidtion)
+        const data = this.fetchAuctionEventByCondition(conidtion);
+        if(!data) throw new HTTP400Error("AUCTIONEVENT_NOT_FOUND");
+
         return data;
     }
 
@@ -65,6 +67,8 @@ export class AuctionEventModel {
               },
            
           ])
+          if(!data) throw new HTTP400Error("AUCTIONEVENT_NOT_FOUND");
+
         return data;
     }
 
@@ -87,15 +91,15 @@ export class AuctionEventModel {
             console.log(body);
             body.creator = userId;
 
-            if (body.startDate) {
-                body.startDate = new Date(body.startDate);
-            }
+            // if (body.startTime) {
+            //     body.startTime = new Date(body.startTime).getTime();
+            // }
 
 
-            if (body.endDate) {
-                body.endDate = new Date(body.endDate);
-            }
-            console.log("start date",body.startDate," endDate",body.endDate);
+            // if (body.endTime) {
+            //     body.endTime = new Date(body.endTime).getTime();
+            // }
+            console.log("start date",body.startTime," endDate",body.endTime);
             
             // if(body.startDate.getTime() < body.endDate.getTime()){
             //     throw new HTTP400Error("Start date should be lesss than end date");

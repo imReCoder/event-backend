@@ -16,7 +16,7 @@ const bson_1 = require("bson");
 // import { sendMessage } from "./../../lib/services/textlocal";
 const httpErrors_1 = require("../../lib/utils/httpErrors");
 const fieldsOfUser = 'image firstName';
-const defaults = 'title starDate endDate description type auctionItems createdAt updatedAt icon coverImage';
+const defaults = 'title startTime endTime description type auctionItems createdAt updatedAt icon coverImage';
 class AuctionEventModel {
     fetchAll(body) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -40,6 +40,8 @@ class AuctionEventModel {
         return __awaiter(this, void 0, void 0, function* () {
             const conidtion = { _id: new bson_1.ObjectID(id) };
             const data = this.fetchAuctionEventByCondition(conidtion);
+            if (!data)
+                throw new httpErrors_1.HTTP400Error("AUCTIONEVENT_NOT_FOUND");
             return data;
         });
     }
@@ -64,6 +66,8 @@ class AuctionEventModel {
                     $project: Object.assign({ hosted_by: "$user.firstName", hoste_by_image: "$user.image", totalItems: { $size: "$auctionItems" } }, (0, index_1.mongoDBProjectFields)(defaults)),
                 },
             ]);
+            if (!data)
+                throw new httpErrors_1.HTTP400Error("AUCTIONEVENT_NOT_FOUND");
             return data;
         });
     }
@@ -86,13 +90,13 @@ class AuctionEventModel {
             try {
                 console.log(body);
                 body.creator = userId;
-                if (body.startDate) {
-                    body.startDate = new Date(body.startDate);
-                }
-                if (body.endDate) {
-                    body.endDate = new Date(body.endDate);
-                }
-                console.log("start date", body.startDate, " endDate", body.endDate);
+                // if (body.startTime) {
+                //     body.startTime = new Date(body.startTime).getTime();
+                // }
+                // if (body.endTime) {
+                //     body.endTime = new Date(body.endTime).getTime();
+                // }
+                console.log("start date", body.startTime, " endDate", body.endTime);
                 // if(body.startDate.getTime() < body.endDate.getTime()){
                 //     throw new HTTP400Error("Start date should be lesss than end date");
                 // }

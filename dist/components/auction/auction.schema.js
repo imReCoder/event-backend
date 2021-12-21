@@ -27,11 +27,11 @@ exports.AuctionSchema = new mongoose_1.Schema({
         type: String,
         required: true
     },
-    startDate: {
+    startTime: {
         type: Date,
         required: false
     },
-    endDate: {
+    endTime: {
         type: Date,
         required: false
     },

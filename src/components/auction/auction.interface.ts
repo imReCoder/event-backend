@@ -2,8 +2,8 @@
 
 export interface IAuction {
     title: string;
-    startDate: Date;
-    endDate: Date;
+    startTime: Date;
+    endTime: Date;
 
     startingBid: number;
 

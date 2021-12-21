@@ -22,17 +22,21 @@ const transaction_model_1 = __importDefault(require("../transactions/transaction
 const transaction_schema_1 = require("../transactions/transaction.schema");
 const auctionEvent_model_1 = __importDefault(require("../auctionEvent/auctionEvent.model"));
 const auctionEvent_schema_1 = require("../auctionEvent/auctionEvent.schema");
-const defaults = 'title starDate endDate description type startingBid lastBid previousBid auctionEventId images currentBid createdAt updatedAt';
+const defaults = 'title startTime endTime description type startingBid lastBid previousBid auctionEventId images currentBid createdAt updatedAt';
 class AuctionModel {
     fetchAll() {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield this.fetchAuctionItemsByCondition({});
+            if (!data)
+                throw new httpErrors_1.HTTP400Error("ITEMS_NOT_FOUND");
             return data;
         });
     }
     fetch(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield auction_schema_1.Auction.findById(id);
+            if (!data)
+                throw new httpErrors_1.HTTP400Error("ITEM_NOT_FOUND");
             return data;
         });
     }
@@ -66,6 +70,8 @@ class AuctionModel {
                     $project: Object.assign({ hosted_by: "$user.firstName", hoste_by_image: "$user.image" }, (0, index_1.mongoDBProjectFields)(defaults)),
                 },
             ]);
+            if (!data)
+                throw new httpErrors_1.HTTP400Error("ITEMS_NOT_FOUND");
             return data;
         });
     }
@@ -81,6 +87,11 @@ class AuctionModel {
                 console.log("body is ", body);
                 body.creator = userId;
                 body.auctionEventId = auctionEventId;
+                const eventData = yield auctionEvent_schema_1.AuctionEvent.findById(auctionEventId).lean();
+                if (!eventData)
+                    throw new httpErrors_1.HTTP400Error("Auction event not found");
+                body.startTime = eventData.startTime;
+                body.endTime = eventData.endTime;
                 // if (body.startDate) {
                 //     body.startDate = new Date(body.startDate);
                 // }
@@ -90,15 +101,9 @@ class AuctionModel {
                 // if(body.startDate < body.endDate){
                 //     throw new HTTP400Error("Error in date");
                 // }
-                console.log("creating obj");
                 const q = new auction_schema_1.Auction(body);
-                console.log("obj creaetd");
                 const data = yield q.add();
-                console.log("aobj added");
-                console.log("updaing auction event ", auctionEventId, " ", q._id);
                 const auctionEventUpdate = yield auctionEvent_schema_1.AuctionEvent.findByIdAndUpdate(auctionEventId, { "$push": { "auctionItems": q._id } }, { "new": true, "upsert": true });
-                console.log("hiii", q);
-                console.log(data);
                 return data;
             }
             catch (e) {

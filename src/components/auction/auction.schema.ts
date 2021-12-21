@@ -26,12 +26,12 @@ export const AuctionSchema: Schema = new Schema(
             required:true
         },
 
-        startDate: {
+        startTime: {
             type: Date,
             required:false
         },
 
-        endDate: {
+        endTime: {
             type: Date,
             required: false
         },

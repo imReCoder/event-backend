@@ -13,7 +13,7 @@ class AuctionEventController {
         const responseHandler = new ResponseHandler();
         try {
             console.log("fetching all");
-            responseHandler.reqRes(req, res).onFetch(msg.FETCH_ALL, await auctionEventModel.fetchAll(req.query)).send();
+            responseHandler.reqRes(req, res).onFetch('FETCHED_ALL_AUCTION_EVENTS', await auctionEventModel.fetchAll(req.query)).send();
         } catch (e) {
             // send error with next function.
             next(responseHandler.sendError(e));
@@ -51,7 +51,7 @@ class AuctionEventController {
         const responseHandler = new ResponseHandler();
         try {
             console.log("fetch by id");
-            responseHandler.reqRes(req, res).onCreate(msg.CREATED, await auctionEventModel.fetch(req.params.id), msg.CREATED_DEC).send();
+            responseHandler.reqRes(req, res).onCreate('AUCTION_EVENT_ FOUND', await auctionEventModel.fetch(req.params.id)).send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }
@@ -60,7 +60,7 @@ class AuctionEventController {
     public update = async (req: Request, res: Response, next: NextFunction) => {
         const responseHandler = new ResponseHandler();
         try {
-            responseHandler.reqRes(req, res).onCreate(msg.UPDATED, await auctionEventModel.update(req.params.id, req.body)).send();
+            responseHandler.reqRes(req, res).onCreate('UPDATED', await auctionEventModel.update(req.params.id, req.body)).send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }
@@ -71,7 +71,7 @@ class AuctionEventController {
 
         try {
             await auctionEventModel.delete(req.params.id);
-            responseHandler.reqRes(req, res).onCreate(msg.UPDATED).send();
+            responseHandler.reqRes(req, res).onCreate('DELETED').send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }
@@ -86,7 +86,7 @@ class AuctionEventController {
             const result = await auctionEventModel.addIcon(req.params.id, req.body.locationUrl);
             console.log(result);
 
-            responseHandler.reqRes(req, res).onCreate("File Uploaded", result).send();
+            responseHandler.reqRes(req, res).onCreate("FILE_UPLOADED", result).send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }
@@ -102,7 +102,7 @@ class AuctionEventController {
             const result = await auctionEventModel.addcoverImage(req.params.id, req.body.locationUrl);
             console.log(result);
 
-            responseHandler.reqRes(req, res).onCreate("File Uploaded", result).send();
+            responseHandler.reqRes(req, res).onCreate("FILE_UPLOADED", result).send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }

@@ -14,17 +14,20 @@ import { Transaction } from "../transactions/transaction.schema";
 import auctionEventModel from "../auctionEvent/auctionEvent.model";
 import { AuctionEvent } from "../auctionEvent/auctionEvent.schema";
 
-const defaults = 'title starDate endDate description type startingBid lastBid previousBid auctionEventId images currentBid createdAt updatedAt'
+const defaults = 'title startTime endTime description type startingBid lastBid previousBid auctionEventId images currentBid createdAt updatedAt'
 export class AuctionModel {
     public async fetchAll() {
 
         const data = await this.fetchAuctionItemsByCondition({});
+        if(!data) throw new HTTP400Error("ITEMS_NOT_FOUND");
 
         return data;
     }
 
     public async fetch(id: string) {
         const data = await Auction.findById(id);
+        if(!data) throw new HTTP400Error("ITEM_NOT_FOUND");
+
         return data;
     }
 
@@ -63,6 +66,8 @@ export class AuctionModel {
       },
    
   ])
+  if(!data) throw new HTTP400Error("ITEMS_NOT_FOUND");
+
 return data;
 }
 
@@ -77,7 +82,11 @@ return data;
             console.log("body is ",body);
             body.creator = userId;
             body.auctionEventId = auctionEventId;
-
+            
+            const eventData = await AuctionEvent.findById(auctionEventId).lean();
+            if(!eventData) throw new HTTP400Error("Auction event not found");
+            body.startTime = eventData.startTime;
+            body.endTime = eventData.endTime;
             // if (body.startDate) {
             //     body.startDate = new Date(body.startDate);
             // }
@@ -89,21 +98,14 @@ return data;
             // if(body.startDate < body.endDate){
             //     throw new HTTP400Error("Error in date");
             // }
-            console.log("creating obj");
             
             const q: IAuctionModel = new Auction(body);
-            console.log("obj creaetd");
             
             const data: IAuctionModel = await q.add();
-            console.log("aobj added");
-            
-            console.log("updaing auction event ",auctionEventId," ",q._id);
-            
+                        
             const auctionEventUpdate = await AuctionEvent.findByIdAndUpdate(auctionEventId, { "$push": { "auctionItems": q._id } },
             { "new": true, "upsert": true },);
-            console.log("hiii", q);
 
-            console.log(data);
             return data;
         } catch (e) {
             console.log(e);

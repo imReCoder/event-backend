@@ -19,13 +19,13 @@ export const AuctionEventSchema: Schema = new Schema(
             required: true
         },
 
-        startDate: {
-            type: Date,
+        startTime: {
+            type: Number,
             required:true
         },
 
-        endDate: {
-            type: Date,
+        endTime: {
+            type: Number,
         },
 
         icon: {

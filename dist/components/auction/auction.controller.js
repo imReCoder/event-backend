@@ -14,14 +14,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const auction_model_1 = __importDefault(require("./auction.model"));
 const responseHandler_1 = __importDefault(require("../../lib/helpers/responseHandler"));
-const customMessage_1 = require("../../lib/helpers/customMessage");
 class AuctionController {
     constructor() {
         this.fetchAll = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const responseHandler = new responseHandler_1.default();
             try {
                 console.log("fetching all");
-                responseHandler.reqRes(req, res).onFetch(customMessage_1.user.FETCH_ALL, yield auction_model_1.default.fetchAll()).send();
+                responseHandler.reqRes(req, res).onFetch('FETCHED_ALL_ITEMS', yield auction_model_1.default.fetchAll()).send();
             }
             catch (e) {
                 // send error with next function.
@@ -34,7 +33,7 @@ class AuctionController {
                 // const data =  await userModel.add(req.body);
                 console.log(req.body);
                 const result = yield auction_model_1.default.add(req.body, req.userId, req.params.id);
-                responseHandler.reqRes(req, res).onCreate("Auction Item Created", result).send();
+                responseHandler.reqRes(req, res).onCreate("ITEM_ADDED", result).send();
             }
             catch (e) {
                 console.log(e.message);
@@ -45,7 +44,7 @@ class AuctionController {
             const responseHandler = new responseHandler_1.default();
             try {
                 const data = yield auction_model_1.default.fetchAuctionItemsByAuctionEvent(req.params.auctionEventId);
-                responseHandler.reqRes(req, res).onFetch("Auction Items Fetched", data).send();
+                responseHandler.reqRes(req, res).onFetch("AUCTION_ITEMS", data).send();
             }
             catch (e) {
                 next(responseHandler.sendError(e));
@@ -59,7 +58,7 @@ class AuctionController {
                 req.body.locationUrl = req.file.location;
                 const result = yield auction_model_1.default.addImage(req.params.id, req.body.locationUrl);
                 console.log(result);
-                responseHandler.reqRes(req, res).onCreate("File Uploaded", result).send();
+                responseHandler.reqRes(req, res).onCreate("FILE_UPLOADED", result).send();
             }
             catch (e) {
                 next(responseHandler.sendError(e));
@@ -80,7 +79,7 @@ class AuctionController {
             const responseHandler = new responseHandler_1.default();
             try {
                 console.log("fetch");
-                responseHandler.reqRes(req, res).onCreate(customMessage_1.user.CREATED, yield auction_model_1.default.fetch(req.params.id), customMessage_1.user.CREATED_DEC).send();
+                responseHandler.reqRes(req, res).onCreate('ITEM_FOUND', yield auction_model_1.default.fetch(req.params.id)).send();
             }
             catch (e) {
                 next(responseHandler.sendError(e));
@@ -89,7 +88,7 @@ class AuctionController {
         this.update = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const responseHandler = new responseHandler_1.default();
             try {
-                responseHandler.reqRes(req, res).onCreate(customMessage_1.user.UPDATED, yield auction_model_1.default.update(req.params.id, req.body)).send();
+                responseHandler.reqRes(req, res).onCreate('UPDATED', yield auction_model_1.default.update(req.params.id, req.body)).send();
             }
             catch (e) {
                 next(responseHandler.sendError(e));
@@ -99,7 +98,7 @@ class AuctionController {
             const responseHandler = new responseHandler_1.default();
             try {
                 yield auction_model_1.default.delete(req.params.id, req.params.auctioneventid);
-                responseHandler.reqRes(req, res).onCreate(customMessage_1.user.UPDATED).send();
+                responseHandler.reqRes(req, res).onCreate('DELETED').send();
             }
             catch (e) {
                 next(responseHandler.sendError(e));

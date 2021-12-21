@@ -21,12 +21,12 @@ exports.AuctionEventSchema = new mongoose_1.Schema({
         ref: "User",
         required: true
     },
-    startDate: {
-        type: Date,
+    startTime: {
+        type: Number,
         required: true
     },
-    endDate: {
-        type: Date,
+    endTime: {
+        type: Number,
     },
     icon: {
         type: String

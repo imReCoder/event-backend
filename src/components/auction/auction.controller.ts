@@ -13,7 +13,7 @@ class AuctionController {
         const responseHandler = new ResponseHandler();
         try {
             console.log("fetching all");
-            responseHandler.reqRes(req, res).onFetch(msg.FETCH_ALL, await auctionModel.fetchAll()).send();
+            responseHandler.reqRes(req, res).onFetch('FETCHED_ALL_ITEMS', await auctionModel.fetchAll()).send();
         } catch (e) {
             // send error with next function.
             next(responseHandler.sendError(e));
@@ -26,7 +26,7 @@ class AuctionController {
             // const data =  await userModel.add(req.body);
             console.log(req.body);
             const result = await auctionModel.add(req.body, req.userId,req.params.id);
-            responseHandler.reqRes(req, res).onCreate("Auction Item Created", result).send();
+            responseHandler.reqRes(req, res).onCreate("ITEM_ADDED", result).send();
         } catch (e) {
             console.log(e.message);
             next(responseHandler.sendError(e));
@@ -38,7 +38,7 @@ class AuctionController {
         try {
             const data = await auctionModel.fetchAuctionItemsByAuctionEvent(req.params.auctionEventId);
 
-            responseHandler.reqRes(req, res).onFetch("Auction Items Fetched", data).send();
+            responseHandler.reqRes(req, res).onFetch("AUCTION_ITEMS", data).send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }
@@ -54,7 +54,7 @@ class AuctionController {
             const result = await auctionModel.addImage(req.params.id, req.body.locationUrl);
             console.log(result);
 
-            responseHandler.reqRes(req, res).onCreate("File Uploaded", result).send();
+            responseHandler.reqRes(req, res).onCreate("FILE_UPLOADED", result).send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }
@@ -76,7 +76,7 @@ class AuctionController {
         const responseHandler = new ResponseHandler();
         try {
             console.log("fetch");
-            responseHandler.reqRes(req, res).onCreate(msg.CREATED, await auctionModel.fetch(req.params.id), msg.CREATED_DEC).send();
+            responseHandler.reqRes(req, res).onCreate('ITEM_FOUND', await auctionModel.fetch(req.params.id)).send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }
@@ -85,7 +85,7 @@ class AuctionController {
     public update = async (req: Request, res: Response, next: NextFunction) => {
         const responseHandler = new ResponseHandler();
         try {
-            responseHandler.reqRes(req, res).onCreate(msg.UPDATED, await auctionModel.update(req.params.id, req.body)).send();
+            responseHandler.reqRes(req, res).onCreate('UPDATED', await auctionModel.update(req.params.id, req.body)).send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }
@@ -96,7 +96,7 @@ class AuctionController {
 
         try {
             await auctionModel.delete(req.params.id, req.params.auctioneventid);
-            responseHandler.reqRes(req, res).onCreate(msg.UPDATED).send();
+            responseHandler.reqRes(req, res).onCreate('DELETED').send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }

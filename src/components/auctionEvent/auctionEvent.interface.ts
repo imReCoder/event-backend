@@ -6,8 +6,8 @@ export interface IAuctionEvent {
     auctionItems: Array<object>;
     creator: string;
 
-    startDate: Date;
-    endDate: Date;
+    startTime: number;
+    endTime: number;
     
     type: string;
 
