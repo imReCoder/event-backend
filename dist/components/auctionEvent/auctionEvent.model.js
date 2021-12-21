@@ -14,10 +14,18 @@ const auctionEvent_schema_1 = require("./auctionEvent.schema");
 // import { sendMessage } from "./../../lib/services/textlocal";
 const httpErrors_1 = require("../../lib/utils/httpErrors");
 class AuctionEventModel {
-    fetchAll() {
+    fetchAll(body) {
         return __awaiter(this, void 0, void 0, function* () {
-            const data = yield auctionEvent_schema_1.AuctionEvent.find();
-            return data;
+            console.log("fetch all for type ", body.type);
+            if (body.type == 'timed') {
+                return yield auctionEvent_schema_1.AuctionEvent.find({ type: "timed" });
+            }
+            else if (body.type == 'live') {
+                yield auctionEvent_schema_1.AuctionEvent.find({}, { type: "live" });
+            }
+            else {
+                return yield auctionEvent_schema_1.AuctionEvent.find({});
+            }
         });
     }
     fetch(id) {
@@ -51,15 +59,17 @@ class AuctionEventModel {
                 if (body.endDate) {
                     body.endDate = new Date(body.endDate);
                 }
-                if (body.startDate < body.endDate) {
-                    throw new httpErrors_1.HTTP400Error("Error in Dates");
-                }
+                console.log("start date", body.startDate, " endDate", body.endDate);
+                // if(body.startDate.getTime() < body.endDate.getTime()){
+                //     throw new HTTP400Error("Start date should be lesss than end date");
+                // }
                 const q = new auctionEvent_schema_1.AuctionEvent(body);
                 const data = yield q.add();
                 return data;
             }
             catch (e) {
-                throw new httpErrors_1.HTTP400Error(e);
+                console.log(e.message);
+                throw new httpErrors_1.HTTP400Error(e.message);
             }
         });
     }
@@ -112,6 +122,16 @@ class AuctionEventModel {
         });
     }
     ;
+    searchAuction(key, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("key is ", key);
+            let data = yield auctionEvent_schema_1.AuctionEvent.find({ title: { $regex: key, $options: "i" } });
+            console.log("data is", data);
+            if (!data.length)
+                throw new httpErrors_1.HTTP400Error("No results");
+            return data;
+        });
+    }
 }
 exports.AuctionEventModel = AuctionEventModel;
 exports.default = new AuctionEventModel();

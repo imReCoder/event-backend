@@ -26,15 +26,15 @@ export const AuctionSchema: Schema = new Schema(
             required:true
         },
 
-        // startDate: {
-        //     type: String,
-        //     required:true
-        // },
+        startDate: {
+            type: Date,
+            required:false
+        },
 
-        // endDate: {
-        //     type: String,
-        //     required: true
-        // },
+        endDate: {
+            type: Date,
+            required: false
+        },
 
         startingBid: {
             type: Number,

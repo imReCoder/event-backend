@@ -11,6 +11,7 @@ import axios from "axios";
 import transactionModel from "../transactions/transaction.model";
 import { Transaction } from "../transactions/transaction.schema";
 import auctionEventModel from "../auctionEvent/auctionEvent.model";
+import { AuctionEvent } from "../auctionEvent/auctionEvent.schema";
 export class AuctionModel {
     public async fetchAll() {
 
@@ -41,7 +42,7 @@ export class AuctionModel {
 
     public async add(body: IAuctionModel,userId:string,auctionEventId:string) {
         try {
-            console.log(body);
+            console.log("body is ",body);
             body.creator = userId;
             body.auctionEventId = auctionEventId;
 
@@ -49,22 +50,33 @@ export class AuctionModel {
             //     body.startDate = new Date(body.startDate);
             // }
 
-
             // if (body.endDate) {
             //     body.endDate = new Date(body.endDate);
             // }
 
             // if(body.startDate < body.endDate){
-            //     throw new HTTP400Error("Error in Dates");
+            //     throw new HTTP400Error("Error in date");
             // }
-
+            console.log("creating obj");
+            
             const q: IAuctionModel = new Auction(body);
-            console.log("hiii", q);
+            console.log("obj creaetd");
+            
             const data: IAuctionModel = await q.add();
+            console.log("aobj added");
+            
+            console.log("updaing auction event ",auctionEventId," ",q._id);
+            
+            const auctionEventUpdate = await AuctionEvent.findByIdAndUpdate(auctionEventId, { "$push": { "auctionItems": q._id } },
+            { "new": true, "upsert": true },);
+            console.log("hiii", q);
+
             console.log(data);
             return data;
         } catch (e) {
-            throw new HTTP400Error(e);
+            console.log(e);
+            
+            throw new HTTP400Error(e.message);
         }
     };
 
@@ -284,6 +296,15 @@ export class AuctionModel {
         } catch (e) {
             throw new HTTP400Error(e);
         }
+    }
+
+    public async searchItem(key:string,userId:string){
+        console.log("key is ",key);
+        let data = await Auction.find({ title: { $regex: key, $options: "i" }});
+        console.log("data is",data);
+        
+        if(!data.length) throw  new HTTP400Error("No results");
+        return data;
     }
 
 }

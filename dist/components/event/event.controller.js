@@ -134,6 +134,7 @@ class EventController {
                 req.body.locationUrl = req.file.location;
                 const result = yield event_model_1.default.addGallery(req.params.id, req.body.locationUrl);
                 console.log(result);
+                // s3UploadMulter.single();
                 // s3UploadMulter.single('video')
                 responseHandler.reqRes(req, res).onCreate("Video uploaded", result).send();
             }

@@ -37,7 +37,7 @@ class AuctionController {
                 responseHandler.reqRes(req, res).onCreate("Auction Item Created", result).send();
             }
             catch (e) {
-                console.log(e);
+                console.log(e.message);
                 next(responseHandler.sendError(e));
             }
         });
@@ -110,6 +110,16 @@ class AuctionController {
             try {
                 const data = yield auction_model_1.default.bid(req.params.auctionId, req.query.amount, req.userId);
                 responseHandler.reqRes(req, res).onCreate("Bid Successfull", data).send();
+            }
+            catch (e) {
+                next(responseHandler.sendError(e));
+            }
+        });
+        this.searchItem = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            const responseHandler = new responseHandler_1.default();
+            try {
+                const data = yield auction_model_1.default.searchItem(req.params.key, req.userId);
+                responseHandler.reqRes(req, res).onCreate("Here is your search results", data).send();
             }
             catch (e) {
                 next(responseHandler.sendError(e));

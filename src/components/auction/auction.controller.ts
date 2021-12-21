@@ -28,7 +28,7 @@ class AuctionController {
             const result = await auctionModel.add(req.body, req.userId,req.params.id);
             responseHandler.reqRes(req, res).onCreate("Auction Item Created", result).send();
         } catch (e) {
-            console.log(e);
+            console.log(e.message);
             next(responseHandler.sendError(e));
         }
     };
@@ -113,7 +113,24 @@ class AuctionController {
             next(responseHandler.sendError(e));
         }
     };
+
+    public searchItem = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+
+        try {
+            const data = await auctionModel.searchItem(req.params.key, req.userId);
+
+            responseHandler.reqRes(req, res).onCreate("Here is your search results", data).send();
+        } catch (e) {
+            next(responseHandler.sendError(e));
+        }
+    };
+
 }
+
+
+
+
 
 export default new AuctionController();
 

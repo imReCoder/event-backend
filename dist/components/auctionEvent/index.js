@@ -42,6 +42,11 @@ exports.default = [
         path: "/auctionevent/coverImage/upload/:id",
         method: "post",
         handler: [s3_1.s3UploadMulter.single('file'), auctionEvent_controller_1.default.addCoverImage]
-    }
+    },
+    {
+        path: "/auctionevent/search/:key",
+        method: "get",
+        handler: [auctionEvent_controller_1.default.searchAuction]
+    },
 ];
 //# sourceMappingURL=index.js.map

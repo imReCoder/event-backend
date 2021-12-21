@@ -13,7 +13,7 @@ class AuctionEventController {
         const responseHandler = new ResponseHandler();
         try {
             console.log("fetching all");
-            responseHandler.reqRes(req, res).onFetch(msg.FETCH_ALL, await auctionEventModel.fetchAll()).send();
+            responseHandler.reqRes(req, res).onFetch(msg.FETCH_ALL, await auctionEventModel.fetchAll(req.query)).send();
         } catch (e) {
             // send error with next function.
             next(responseHandler.sendError(e));
@@ -103,6 +103,19 @@ class AuctionEventController {
             console.log(result);
 
             responseHandler.reqRes(req, res).onCreate("File Uploaded", result).send();
+        } catch (e) {
+            next(responseHandler.sendError(e));
+        }
+    };
+
+    
+    public searchAuction = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+
+        try {
+            const data = await auctionEventModel.searchAuction(req.params.key, req.userId);
+
+            responseHandler.reqRes(req, res).onCreate("Here is your search results", data).send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }

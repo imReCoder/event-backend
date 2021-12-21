@@ -45,6 +45,11 @@ exports.default = [
         handler: [auction_controller_1.default.bid]
     },
     {
+        path: "/auction/search/:key",
+        method: "get",
+        handler: [auction_controller_1.default.searchItem]
+    },
+    {
         path: "/auction/image/upload/:id",
         method: "post",
         handler: [s3_1.s3UploadMulter.single('file'), auction_controller_1.default.addImage]

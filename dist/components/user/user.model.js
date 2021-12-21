@@ -298,9 +298,10 @@ class UserModel {
                 console.log(user);
                 if (user.phone) {
                     const apiKey = process.env.IKCPLAYAPIKEY;
+                    const url = process.env.IKC_MASTER_WALLET_URI;
                     const wallet = yield (0, axios_1.default)({
                         method: 'GET',
-                        url: `http://13.233.83.134:8000/wallet?apiKey=${apiKey}&phone=${user.phone}`,
+                        url: `${url}/wallet?apiKey=${apiKey}&phone=${user.phone}`,
                     });
                     if (wallet) {
                         console.log(wallet);

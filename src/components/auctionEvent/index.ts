@@ -38,6 +38,11 @@ export default [
         path: "/auctionevent/coverImage/upload/:id",
         method: "post",
         handler: [s3UploadMulter.single('file'),auctionEventController.addCoverImage]
-    }
+    },
+    {
+        path: "/auctionevent/search/:key",
+        method: "get",
+        handler:[auctionEventController.searchAuction]
+    },
 ];
 

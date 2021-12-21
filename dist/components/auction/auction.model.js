@@ -20,6 +20,7 @@ const axios_1 = __importDefault(require("axios"));
 const transaction_model_1 = __importDefault(require("../transactions/transaction.model"));
 const transaction_schema_1 = require("../transactions/transaction.schema");
 const auctionEvent_model_1 = __importDefault(require("../auctionEvent/auctionEvent.model"));
+const auctionEvent_schema_1 = require("../auctionEvent/auctionEvent.schema");
 class AuctionModel {
     fetchAll() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -51,7 +52,7 @@ class AuctionModel {
     add(body, userId, auctionEventId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log(body);
+                console.log("body is ", body);
                 body.creator = userId;
                 body.auctionEventId = auctionEventId;
                 // if (body.startDate) {
@@ -61,16 +62,22 @@ class AuctionModel {
                 //     body.endDate = new Date(body.endDate);
                 // }
                 // if(body.startDate < body.endDate){
-                //     throw new HTTP400Error("Error in Dates");
+                //     throw new HTTP400Error("Error in date");
                 // }
+                console.log("creating obj");
                 const q = new auction_schema_1.Auction(body);
-                console.log("hiii", q);
+                console.log("obj creaetd");
                 const data = yield q.add();
+                console.log("aobj added");
+                console.log("updaing auction event ", auctionEventId, " ", q._id);
+                const auctionEventUpdate = yield auctionEvent_schema_1.AuctionEvent.findByIdAndUpdate(auctionEventId, { "$push": { "auctionItems": q._id } }, { "new": true, "upsert": true });
+                console.log("hiii", q);
                 console.log(data);
                 return data;
             }
             catch (e) {
-                throw new httpErrors_1.HTTP400Error(e);
+                console.log(e);
+                throw new httpErrors_1.HTTP400Error(e.message);
             }
         });
     }
@@ -266,6 +273,16 @@ class AuctionModel {
             catch (e) {
                 throw new httpErrors_1.HTTP400Error(e);
             }
+        });
+    }
+    searchItem(key, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("key is ", key);
+            let data = yield auction_schema_1.Auction.find({ title: { $regex: key, $options: "i" } });
+            console.log("data is", data);
+            if (!data.length)
+                throw new httpErrors_1.HTTP400Error("No results");
+            return data;
         });
     }
 }

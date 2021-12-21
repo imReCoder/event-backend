@@ -11,11 +11,16 @@ import axios from "axios";
 import transactionModel from "../transactions/transaction.model";
 import { Transaction } from "../transactions/transaction.schema";
 export class AuctionEventModel {
-    public async fetchAll() {
-
-        const data = await AuctionEvent.find();
-
-        return data;
+    public async fetchAll(body:any) {
+        console.log("fetch all for type ",body.type);
+        
+        if(body.type=='timed'){
+            return await AuctionEvent.find({type:"timed"});
+        }else if(body.type=='live'){
+            await AuctionEvent.find({},{type:"live"});
+        }else{
+            return await AuctionEvent.find({});
+        }
     }
 
     public async fetch(id: string) {
@@ -50,16 +55,19 @@ export class AuctionEventModel {
             if (body.endDate) {
                 body.endDate = new Date(body.endDate);
             }
-
-            if(body.startDate < body.endDate){
-                throw new HTTP400Error("Error in Dates");
-            }
+            console.log("start date",body.startDate," endDate",body.endDate);
+            
+            // if(body.startDate.getTime() < body.endDate.getTime()){
+            //     throw new HTTP400Error("Start date should be lesss than end date");
+            // }
 
             const q: IAuctionEventModel = new AuctionEvent(body);
             const data: IAuctionEventModel = await q.add();
             return data;
         } catch (e) {
-            throw new HTTP400Error(e);
+            console.log(e.message);
+            
+            throw new HTTP400Error(e.message);
         }
     };
 
@@ -107,6 +115,14 @@ export class AuctionEventModel {
 
         return auctionEvent;
     };
+    public async searchAuction(key:string,userId:string){
+        console.log("key is ",key);
+        let data = await AuctionEvent.find({ title: { $regex: key, $options: "i" }});
+        console.log("data is",data);
+        
+        if(!data.length) throw  new HTTP400Error("No results");
+        return data;
+    }
 }
 
 export default new AuctionEventModel();

@@ -27,14 +27,14 @@ exports.AuctionSchema = new mongoose_1.Schema({
         type: String,
         required: true
     },
-    // startDate: {
-    //     type: String,
-    //     required:true
-    // },
-    // endDate: {
-    //     type: String,
-    //     required: true
-    // },
+    startDate: {
+        type: Date,
+        required: false
+    },
+    endDate: {
+        type: Date,
+        required: false
+    },
     startingBid: {
         type: Number,
         required: true

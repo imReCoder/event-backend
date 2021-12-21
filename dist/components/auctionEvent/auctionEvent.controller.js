@@ -21,7 +21,7 @@ class AuctionEventController {
             const responseHandler = new responseHandler_1.default();
             try {
                 console.log("fetching all");
-                responseHandler.reqRes(req, res).onFetch(customMessage_1.user.FETCH_ALL, yield auctionEvent_model_1.default.fetchAll()).send();
+                responseHandler.reqRes(req, res).onFetch(customMessage_1.user.FETCH_ALL, yield auctionEvent_model_1.default.fetchAll(req.query)).send();
             }
             catch (e) {
                 // send error with next function.
@@ -104,6 +104,16 @@ class AuctionEventController {
                 const result = yield auctionEvent_model_1.default.addcoverImage(req.params.id, req.body.locationUrl);
                 console.log(result);
                 responseHandler.reqRes(req, res).onCreate("File Uploaded", result).send();
+            }
+            catch (e) {
+                next(responseHandler.sendError(e));
+            }
+        });
+        this.searchAuction = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            const responseHandler = new responseHandler_1.default();
+            try {
+                const data = yield auctionEvent_model_1.default.searchAuction(req.params.key, req.userId);
+                responseHandler.reqRes(req, res).onCreate("Here is your search results", data).send();
             }
             catch (e) {
                 next(responseHandler.sendError(e));
