@@ -1,3 +1,4 @@
+import { s3, s3UploadMulter } from './../../lib/services/s3';
 import userController from "./user.controller";
 
 export default [
@@ -75,6 +76,11 @@ export default [
     path: "/user/:id",
     method: "patch",
     handler: [userController.update]
+  },
+  {
+    path: "/user/addIcon",
+    method: "post",
+    handler: [s3UploadMulter.single('file'),userController.uploadFile]
   },
   // {
   //   path: "/user/verifyUser",

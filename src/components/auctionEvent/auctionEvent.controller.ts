@@ -50,7 +50,7 @@ class AuctionEventController {
     public fetch = async (req: Request, res: Response, next: NextFunction) => {
         const responseHandler = new ResponseHandler();
         try {
-            console.log("fetch");
+            console.log("fetch by id");
             responseHandler.reqRes(req, res).onCreate(msg.CREATED, await auctionEventModel.fetch(req.params.id), msg.CREATED_DEC).send();
         } catch (e) {
             next(responseHandler.sendError(e));

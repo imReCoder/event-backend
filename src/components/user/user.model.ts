@@ -563,6 +563,20 @@ export class UserModel {
 
     return { proceed: false };
   };
+
+  public async addIcon(id: string, filelocation: string) {
+    try {
+      console.log(id);
+      const data = await User.findOneAndUpdate({ _id: id }, {
+         "image": filelocation
+             },
+        { new: true });
+      
+      return data;
+    } catch (e) {
+      throw new HTTP400Error(e.message);
+    }
+  };
 }
 
 export default new UserModel();

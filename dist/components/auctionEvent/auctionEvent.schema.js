@@ -17,7 +17,8 @@ exports.AuctionEventSchema = new mongoose_1.Schema({
         required: true
     },
     creator: {
-        type: String,
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "User",
         required: true
     },
     startDate: {

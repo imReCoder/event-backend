@@ -28,6 +28,23 @@ class UserController {
                 next(responseHandler.sendError(e));
             }
         });
+        this.uploadFile = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            const responseHandler = new responseHandler_1.default();
+            try {
+                // @ts-ignore
+                console.log(req.file);
+                // req.body.filename = req.file.originalname;
+                req.body.locationUrl = req.file.location;
+                const result = yield user_model_1.default.addIcon(req.userId, req.body.locationUrl);
+                console.log(result);
+                // s3UploadMulter.single();
+                // s3UploadMulter.single('video')
+                responseHandler.reqRes(req, res).onCreate("File uploaded", result).send();
+            }
+            catch (e) {
+                next(responseHandler.sendError(e));
+            }
+        });
         this.create = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const responseHandler = new responseHandler_1.default();
             try {

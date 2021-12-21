@@ -55,7 +55,7 @@ class AuctionEventController {
         this.fetch = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const responseHandler = new responseHandler_1.default();
             try {
-                console.log("fetch");
+                console.log("fetch by id");
                 responseHandler.reqRes(req, res).onCreate(customMessage_1.user.CREATED, yield auctionEvent_model_1.default.fetch(req.params.id), customMessage_1.user.CREATED_DEC).send();
             }
             catch (e) {

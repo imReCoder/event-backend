@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const s3_1 = require("./../../lib/services/s3");
 const user_controller_1 = __importDefault(require("./user.controller"));
 exports.default = [
     {
@@ -79,6 +80,11 @@ exports.default = [
         path: "/user/:id",
         method: "patch",
         handler: [user_controller_1.default.update]
+    },
+    {
+        path: "/user/addIcon",
+        method: "post",
+        handler: [s3_1.s3UploadMulter.single('file'), user_controller_1.default.uploadFile]
     },
     // {
     //   path: "/user/verifyUser",

@@ -591,6 +591,21 @@ class UserModel {
         });
     }
     ;
+    addIcon(id, filelocation) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log(id);
+                const data = yield user_schema_1.User.findOneAndUpdate({ _id: id }, {
+                    "image": filelocation
+                }, { new: true });
+                return data;
+            }
+            catch (e) {
+                throw new httpErrors_1.HTTP400Error(e.message);
+            }
+        });
+    }
+    ;
 }
 exports.UserModel = UserModel;
 exports.default = new UserModel();

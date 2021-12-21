@@ -20,6 +20,22 @@ class UserController {
   };
 
 
+  public uploadFile = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+    try {
+        // @ts-ignore
+        console.log(req.file);
+        // req.body.filename = req.file.originalname;
+        req.body.locationUrl = req.file.location;
+        const result = await userModel.addIcon(req.userId,req.body.locationUrl);
+        console.log(result);
+        // s3UploadMulter.single();
+        // s3UploadMulter.single('video')
+        responseHandler.reqRes(req, res).onCreate("File uploaded", result).send();
+    } catch (e) {
+        next(responseHandler.sendError(e));
+    }
+};
 
   public create = async (req: Request, res: Response, next: NextFunction) => {
     const responseHandler = new ResponseHandler();

@@ -17,6 +17,10 @@ export const UserSchema: Schema = new Schema(
       minlength: 2,
       required: false
     },
+    image:{
+      type:String,
+      required:false
+    },
     lastName: {
       type: String,
       minlength: 2,

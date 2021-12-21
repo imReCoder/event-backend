@@ -10,27 +10,65 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuctionEventModel = void 0;
+const index_1 = require("./../../lib/utils/index");
 const auctionEvent_schema_1 = require("./auctionEvent.schema");
+const bson_1 = require("bson");
 // import { sendMessage } from "./../../lib/services/textlocal";
 const httpErrors_1 = require("../../lib/utils/httpErrors");
+const fieldsOfUser = 'image firstName';
+const defaults = 'title starDate endDate description type auctionItems createdAt updatedAt';
 class AuctionEventModel {
     fetchAll(body) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("fetch all for type ", body.type);
+            let condition = {};
             if (body.type == 'timed') {
-                return yield auctionEvent_schema_1.AuctionEvent.find({ type: "timed" });
+                condition = { type: "timed" };
+                return yield this.fetchAuctionEventByCondition(condition);
             }
             else if (body.type == 'live') {
-                yield auctionEvent_schema_1.AuctionEvent.find({}, { type: "live" });
+                condition = { type: "live" };
+                return yield this.fetchAuctionEventByCondition(condition);
             }
             else {
-                return yield auctionEvent_schema_1.AuctionEvent.find({});
+                condition = {};
+                return yield this.fetchAuctionEventByCondition(condition);
             }
         });
     }
     fetch(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const data = yield auctionEvent_schema_1.AuctionEvent.findById(id);
+            const conidtion = { _id: new bson_1.ObjectID(id) };
+            const data = this.fetchAuctionEventByCondition(conidtion);
+            return data;
+        });
+    }
+    fetchAuctionEventByCondition(condition) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = yield auctionEvent_schema_1.AuctionEvent.aggregate([
+                {
+                    $match: condition,
+                },
+                // {
+                //     $group:{
+                //        _id:"$creator" 
+                //     }
+                // },
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "creator",
+                        foreignField: "_id",
+                        as: "user",
+                    },
+                },
+                {
+                    $unwind: { path: "$user" },
+                },
+                {
+                    $project: Object.assign({ hosted_by: "$user.firstName", hoste_by_image: "$user.image", totalItems: { $size: "$auctionItems" } }, (0, index_1.mongoDBProjectFields)(defaults)),
+                },
+            ]);
             return data;
         });
     }

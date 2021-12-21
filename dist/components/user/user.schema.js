@@ -21,6 +21,10 @@ exports.UserSchema = new mongoose_1.Schema({
         minlength: 2,
         required: false
     },
+    image: {
+        type: String,
+        required: false
+    },
     lastName: {
         type: String,
         minlength: 2,
