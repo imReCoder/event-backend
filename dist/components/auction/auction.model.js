@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuctionModel = void 0;
+const index_1 = require("./../../lib/utils/index");
 const auction_schema_1 = require("./auction.schema");
 // import { sendMessage } from "./../../lib/services/textlocal";
 const httpErrors_1 = require("../../lib/utils/httpErrors");
@@ -21,10 +22,11 @@ const transaction_model_1 = __importDefault(require("../transactions/transaction
 const transaction_schema_1 = require("../transactions/transaction.schema");
 const auctionEvent_model_1 = __importDefault(require("../auctionEvent/auctionEvent.model"));
 const auctionEvent_schema_1 = require("../auctionEvent/auctionEvent.schema");
+const defaults = 'title starDate endDate description type startingBid lastBid previousBid auctionEventId images currentBid createdAt updatedAt';
 class AuctionModel {
     fetchAll() {
         return __awaiter(this, void 0, void 0, function* () {
-            const data = yield auction_schema_1.Auction.find();
+            const data = yield this.fetchAuctionItemsByCondition({});
             return data;
         });
     }
@@ -40,6 +42,30 @@ class AuctionModel {
                 runValidators: true,
                 new: true
             });
+            return data;
+        });
+    }
+    fetchAuctionItemsByCondition(condition) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = yield auction_schema_1.Auction.aggregate([
+                {
+                    $match: condition,
+                },
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "creator",
+                        foreignField: "_id",
+                        as: "user",
+                    },
+                },
+                {
+                    $unwind: { path: "$user" },
+                },
+                {
+                    $project: Object.assign({ hosted_by: "$user.firstName", hoste_by_image: "$user.image" }, (0, index_1.mongoDBProjectFields)(defaults)),
+                },
+            ]);
             return data;
         });
     }

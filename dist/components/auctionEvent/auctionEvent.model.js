@@ -16,7 +16,7 @@ const bson_1 = require("bson");
 // import { sendMessage } from "./../../lib/services/textlocal";
 const httpErrors_1 = require("../../lib/utils/httpErrors");
 const fieldsOfUser = 'image firstName';
-const defaults = 'title starDate endDate description type auctionItems createdAt updatedAt';
+const defaults = 'title starDate endDate description type auctionItems createdAt updatedAt icon coverImage';
 class AuctionEventModel {
     fetchAll(body) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -49,11 +49,6 @@ class AuctionEventModel {
                 {
                     $match: condition,
                 },
-                // {
-                //     $group:{
-                //        _id:"$creator" 
-                //     }
-                // },
                 {
                     $lookup: {
                         from: "users",

@@ -58,7 +58,8 @@ export const AuctionSchema: Schema = new Schema(
         }],
 
         creator: {
-            type: String,
+            type: Schema.Types.ObjectId,
+            ref:"User",
             required:true
         },
     },

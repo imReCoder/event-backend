@@ -14,7 +14,7 @@ import axios from "axios";
 import transactionModel from "../transactions/transaction.model";
 import { Transaction } from "../transactions/transaction.schema";
 const fieldsOfUser = 'image firstName';
-const defaults = 'title starDate endDate description type auctionItems createdAt updatedAt'
+const defaults = 'title starDate endDate description type auctionItems createdAt updatedAt icon coverImage'
 export class AuctionEventModel {
     public async fetchAll(body:any) {
         console.log("fetch all for type ",body.type);
@@ -43,12 +43,7 @@ export class AuctionEventModel {
             {
               $match:condition,
             },
-            // {
-            //     $group:{
-            //        _id:"$creator" 
-            //     }
-            // },
-            
+         
             {
               $lookup: {
                 from: "users",

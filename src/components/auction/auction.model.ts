@@ -1,3 +1,4 @@
+import { mongoDBProjectFields } from './../../lib/utils/index';
 import { generateToken, imageUrl, isValidMongoId, otpGenerator } from "../../lib/helpers";
 import { IAuction } from "./auction.interface";
 import { IAuctionModel, Auction } from "./auction.schema";
@@ -12,10 +13,12 @@ import transactionModel from "../transactions/transaction.model";
 import { Transaction } from "../transactions/transaction.schema";
 import auctionEventModel from "../auctionEvent/auctionEvent.model";
 import { AuctionEvent } from "../auctionEvent/auctionEvent.schema";
+
+const defaults = 'title starDate endDate description type startingBid lastBid previousBid auctionEventId images currentBid createdAt updatedAt'
 export class AuctionModel {
     public async fetchAll() {
 
-        const data = await Auction.find();
+        const data = await this.fetchAuctionItemsByCondition({});
 
         return data;
     }
@@ -33,6 +36,35 @@ export class AuctionModel {
 
         return data;
     }
+
+    public async fetchAuctionItemsByCondition(condition:any) {
+        const data = await Auction.aggregate([
+    {
+      $match:condition,
+    },
+ 
+    {
+      $lookup: {
+        from: "users",
+        localField: "creator",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    {
+      $unwind: { path: "$user" },
+    },
+    {
+        $project: {
+            hosted_by:"$user.firstName",
+            hoste_by_image:"$user.image",
+          ...mongoDBProjectFields(defaults),
+        },
+      },
+   
+  ])
+return data;
+}
 
     public async delete(id: string, auctionEventId: string) {
         await auctionEventModel.removeAuctionItems(auctionEventId, id);

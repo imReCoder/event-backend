@@ -54,7 +54,8 @@ exports.AuctionSchema = new mongoose_1.Schema({
             amount: Number
         }],
     creator: {
-        type: String,
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "User",
         required: true
     },
 }, {
