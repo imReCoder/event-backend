@@ -21,7 +21,7 @@ class AuctionEventModel {
     fetchAll(body) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("fetch all for type ", body.type);
-            let condition = {};
+            let condition;
             if (body.type == 'timed') {
                 condition = { type: "timed" };
                 return yield this.fetchAuctionEventByCondition(condition);
@@ -32,6 +32,25 @@ class AuctionEventModel {
             }
             else {
                 condition = {};
+                return yield this.fetchAuctionEventByCondition(condition);
+            }
+        });
+    }
+    upcoming(body) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const today = Date.now();
+            console.log("date now is ", today);
+            let condition = {};
+            if (body.type == 'timed') {
+                condition = { startTime: { $gte: today }, type: "timed" };
+                return yield this.fetchAuctionEventByCondition(condition);
+            }
+            else if (body.type == 'live') {
+                condition = { startTime: { $gte: today }, type: "live" };
+                return yield this.fetchAuctionEventByCondition(condition);
+            }
+            else {
+                condition = { startTime: { $gte: today } };
                 return yield this.fetchAuctionEventByCondition(condition);
             }
         });
@@ -63,7 +82,7 @@ class AuctionEventModel {
                     $unwind: { path: "$user" },
                 },
                 {
-                    $project: Object.assign({ hosted_by: "$user.firstName", hoste_by_image: "$user.image", display_image: "$coverImage", total_tems: { $size: "$auctionItems" }, items: "$auctionItems", name: "$title", isLive: {
+                    $project: Object.assign({ hosted_by: "$user.firstName", hoste_by_image: "$user.image", display_image: "$coverImage", total_items: { $size: "$auctionItems" }, items: "$auctionItems", name: "$title", isLive: {
                             $cond: {
                                 if: {
                                     $eq: ['$type', "live"]

@@ -27,6 +27,17 @@ class AuctionEventController {
                 next(responseHandler.sendError(e));
             }
         });
+        this.upcoming = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            const responseHandler = new responseHandler_1.default();
+            try {
+                console.log("fetching all");
+                responseHandler.reqRes(req, res).onFetch('FETCHED_UPCOMING_AUCTION_EVENTS', yield auctionEvent_model_1.default.upcoming(req.query)).send();
+            }
+            catch (e) {
+                // send error with next function.
+                next(responseHandler.sendError(e));
+            }
+        });
         this.create = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const responseHandler = new responseHandler_1.default();
             try {

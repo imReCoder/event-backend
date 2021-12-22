@@ -19,6 +19,12 @@ export default [
         handler: [auctionEventController.fetchAll]
     },
     {
+        path: "/auctionevent/upcoming",
+        method: "get",
+        escapeAuth:true,
+        handler: [auctionEventController.upcoming]
+    },
+    {
         path: "/auctionevent/:id",
         method: "get",
         escapeAuth:true,

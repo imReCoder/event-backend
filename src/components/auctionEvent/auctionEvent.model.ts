@@ -18,7 +18,7 @@ const defaults = 'startTime endTime description type createdAt updatedAt icon'
 export class AuctionEventModel {
     public async fetchAll(body:any) {
         console.log("fetch all for type ",body.type);
-        let condition={};
+        let condition;
         if(body.type=='timed'){
             condition = {type:"timed"};
             return await this.fetchAuctionEventByCondition(condition);
@@ -30,6 +30,26 @@ export class AuctionEventModel {
             return await this.fetchAuctionEventByCondition(condition);
         }
     }
+    public async upcoming(body:any) {
+        const today = Date.now();
+        console.log("date now is ",today);
+        
+        let condition={};
+    
+        if(body.type=='timed'){
+            condition = {startTime: { $gte: today },type:"timed"};
+            return await this.fetchAuctionEventByCondition(condition);
+        }else if(body.type=='live'){
+            condition = {startTime: { $gte: today },type:"live"};
+            return await this.fetchAuctionEventByCondition(condition);
+        }else{
+            condition = {startTime: { $gte: today }};
+            
+            return await this.fetchAuctionEventByCondition(condition);
+        }
+    }
+
+    
 
 
     public async fetch(id: string) {
@@ -62,7 +82,7 @@ export class AuctionEventModel {
                     hosted_by:"$user.firstName",
                     hoste_by_image:"$user.image",
                     display_image:"$coverImage",
-                    total_tems:{$size:"$auctionItems"},
+                    total_items:{$size:"$auctionItems"},
                     items:"$auctionItems",
                     name:"$title",
                     isLive:{
