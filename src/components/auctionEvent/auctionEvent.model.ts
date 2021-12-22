@@ -14,7 +14,7 @@ import axios from "axios";
 import transactionModel from "../transactions/transaction.model";
 import { Transaction } from "../transactions/transaction.schema";
 const fieldsOfUser = 'image firstName';
-const defaults = 'title startTime endTime description type auctionItems createdAt updatedAt icon coverImage'
+const defaults = 'startTime endTime description type createdAt updatedAt icon'
 export class AuctionEventModel {
     public async fetchAll(body:any) {
         console.log("fetch all for type ",body.type);
@@ -61,7 +61,19 @@ export class AuctionEventModel {
                 $project: {
                     hosted_by:"$user.firstName",
                     hoste_by_image:"$user.image",
-                    totalItems:{$size:"$auctionItems"},
+                    display_image:"$coverImage",
+                    total_tems:{$size:"$auctionItems"},
+                    items:"$auctionItems",
+                    name:"$title",
+                    isLive:{
+                        $cond: {
+                            if: {
+                              $eq: ['$type', "live"]
+                            },
+                            then: true,
+                            else: false,
+                          },
+                    },
                   ...mongoDBProjectFields(defaults),
                 },
               },

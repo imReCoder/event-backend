@@ -16,7 +16,7 @@ const bson_1 = require("bson");
 // import { sendMessage } from "./../../lib/services/textlocal";
 const httpErrors_1 = require("../../lib/utils/httpErrors");
 const fieldsOfUser = 'image firstName';
-const defaults = 'title startTime endTime description type auctionItems createdAt updatedAt icon coverImage';
+const defaults = 'startTime endTime description type createdAt updatedAt icon';
 class AuctionEventModel {
     fetchAll(body) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -63,7 +63,15 @@ class AuctionEventModel {
                     $unwind: { path: "$user" },
                 },
                 {
-                    $project: Object.assign({ hosted_by: "$user.firstName", hoste_by_image: "$user.image", totalItems: { $size: "$auctionItems" } }, (0, index_1.mongoDBProjectFields)(defaults)),
+                    $project: Object.assign({ hosted_by: "$user.firstName", hoste_by_image: "$user.image", display_image: "$coverImage", total_tems: { $size: "$auctionItems" }, items: "$auctionItems", name: "$title", isLive: {
+                            $cond: {
+                                if: {
+                                    $eq: ['$type', "live"]
+                                },
+                                then: true,
+                                else: false,
+                            },
+                        } }, (0, index_1.mongoDBProjectFields)(defaults)),
                 },
             ]);
             if (!data)
