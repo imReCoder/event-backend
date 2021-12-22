@@ -7,9 +7,15 @@ export interface IAuction {
 
     startingBid: number;
 
-    currentBid: any;
+    currentBid: Bid;
 
     creator: string;
     auctionEventId: string;
+    previousBid:Bid[]
 
+}
+
+interface Bid{
+    user:string,
+    amount:number
 }

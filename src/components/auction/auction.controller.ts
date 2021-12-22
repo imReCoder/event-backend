@@ -106,7 +106,7 @@ class AuctionController {
         const responseHandler = new ResponseHandler();
 
         try {
-            const data = await auctionModel.bid(req.params.auctionId, req.query.amount, req.userId);
+            const data = await auctionModel.bid(req.params.id, req.query.amount, req.userId);
 
             responseHandler.reqRes(req, res).onCreate("Bid Successfull", data).send();
         } catch (e) {

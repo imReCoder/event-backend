@@ -1,3 +1,4 @@
+import { User } from './../user/user.schema';
 import { mongoDBProjectFields } from './../../lib/utils/index';
 import { generateToken, imageUrl, isValidMongoId, otpGenerator } from "../../lib/helpers";
 import { IAuction } from "./auction.interface";
@@ -114,25 +115,64 @@ return data;
         }
     };
 
+    public async returnIkc(auctionId:string,userId:string,amount:number){
+        try{
+
+            const user = await User.findById(userId);
+            const body = {
+                type: "Others",
+                amount: amount,
+                phone:user.phone,
+                metadataType: "Credit",
+                description: `getting return from Bidding for ${auctionId}`,
+                auctionId,
+                userId
+            }
+            console.log("returning ikc ",body);
+
+            const transactionData = await this.transactionBodyCreator(body);
+            const paymentBody = {
+                type: "Others",
+                amount: amount,
+                phone:user.phone,
+                metadataType: "Credit",
+                description: `getting return from Bidding for ${auctionId}`,
+                auctionId,
+                userId,
+            transactionId:transactionData._id
+        }
+        const res = await this.masterToWalletTransaction(paymentBody);
+        if(!res) throw new HTTP400Error("Refund Faild for ",paymentBody.userId);
+        const transaction = await Transaction.findOneAndUpdate({ _id: paymentBody.transactionId }, {
+            $set: { "status": "Returned" }
+        }, {
+            new: true
+        });
+        console.log("status updated for transaciton ",transaction);
+        
+        return res;
+    }catch(e){
+        console.log(e);
+        throw new HTTP400Error(e.message);
+        
+    }
+    }
+    
     public async changeCurrentBid(auctionId:string,userId: string, amount: number) {
         try {
 
             const auction = await Auction.findById(auctionId);
-
-            const body = {
-                type: "Others",
-                amount: amount,
-                metadataType: "CREDIT",
-                description: `getting return from Bidding for ${auctionId}`,
-                auctionId
+            let isPreviousBid = false;
+            let lastBid;
+            let res;
+            if(auction.currentBid && auction.currentBid.user){
+                isPreviousBid = true;
+                lastBid = auction.currentBid;
+                console.log("prev bid ",lastBid);
+                res = await this.returnIkc(auctionId,lastBid.user,lastBid.amount);
             }
-
-            const transactionData = await this.transactionBodyCreator(body);
-
-            if (transactionData) {
-                const res = await this.masterToWalletTransaction(transactionData);
-
-                if (res) {
+            
+                if (res || !isPreviousBid) {
             
                     const currentBid = {
                         user: userId,
@@ -151,10 +191,12 @@ return data;
                     throw new HTTP400Error("Master wallet to  wallet transaction failed");
                 }
                 
-            }
+            
 
         } catch (e) {
-            throw new HTTP400Error(e);
+            console.log(e);
+            
+            throw new HTTP400Error(e.message);
         }
     }
 
@@ -197,17 +239,21 @@ return data;
 
             return res;
         } catch (e) {
-            throw new HTTP400Error(e);
+            console.log(e);
+            
+            throw new HTTP400Error(e.message);
         }
     };
 
     public async transactionBodyCreator(body: any) {
         try {
+            
             const transactionBody = {
                 userId:body.userId,
                 amount: body.amount,
                 type: body.type,
                 description: body.description,
+                phone:body.phone,
                 metadata: {
                     type: body.metadataType,
                     description: body.description,
@@ -218,41 +264,45 @@ return data;
 
             const transaction = new Transaction(transactionBody);
 
-            const res = await transactionModel.create(transaction);
+            const res = await transaction.save();
+           
 
             if (!res) {
                 throw new HTTP400Error("Transaction creation failed");
             }
-
-            return transactionBody;
+            
+            return res;
         } catch (e) {
-            throw new HTTP400Error(e);
+            console.log(e);
+            
+            throw new HTTP400Error(e.message);
         }
     }
 
     public async walletToMasterTransaction(transactionBody :any ) {
         try {
             const apiKey = process.env.IKCDEALKEY;
-            const url = `http://localhost:8000/wallet/removeFromWallet?apiKey=${apiKey}`;
-
+            const url = `${process.env.IKC_MASTER_WALLET_URI}/wallet/addToMasterWallet?apiKey=${apiKey}`;
+            console.log("url is ",url);
+            
+            
             const res = await this.axiosRequestor(url, transactionBody);
-
+            
             if (res.data.status) {
-
+                
                 const currentBid = await this.changeCurrentBid(transactionBody.metadata.auctionId, transactionBody.userId, transactionBody.amount);
 
                 if (!currentBid) {
                     throw new HTTP400Error("Change of current Bid Failed");
                 }
 
-                console.log("Status transaction change");
-                const transaction = await Transaction.findOneAndUpdate({ userId: transactionBody.userId }, {
+                const transaction = await Transaction.findOneAndUpdate({ _id: transactionBody.transactionId }, {
                     $set: { "status": "TXN_SUCCESS" }
                 }, {
                     new: true
                 });
+                console.log("Status transaction change",transaction);
 
-                console.log(transaction);
 
                 if (transaction.status != "TXN_SUCCESS") {
                     throw Error(`Transaction status not updated for user ${transactionBody.userId}`);
@@ -264,7 +314,9 @@ return data;
 
             return res;
         } catch (e) {
-            throw new HTTP400Error(e);
+            console.log(e);
+            
+            throw new HTTP400Error(e.message);
         }
     };
 
@@ -273,7 +325,7 @@ return data;
     public async masterToWalletTransaction(transactionBody: any) {
         try {
             const apiKey = process.env.IKCDEALKEY;
-            const url = `http://localhost:8000/wallet/addToWallet?apiKey=${apiKey}`;
+             const url = `${process.env.IKC_MASTER_WALLET_URI}/wallet/addToWallet?apiKey=${apiKey}`;
 
             const res = await this.axiosRequestor(url, transactionBody);
 
@@ -286,7 +338,6 @@ return data;
                     new: true
                 });
 
-                console.log(transaction);
 
                 if (transaction.status != "TXN_SUCCESS") {
                     throw Error(`Transaction status not updated for user ${transactionBody.userId}`);
@@ -304,31 +355,55 @@ return data;
 
     public async bid(auctionId: string,amount:number,userId:string) {
         try {
+            console.log("bid request for ",amount," ",auctionId);
+            
+            const user = await User.findById(userId);
+            
+            if(!user.phone) throw new HTTP400Error("User phone number is not added. Add phone number to continue..");
             const auction = await Auction.findById(auctionId);
-
+            
             if (amount < auction.startingBid || amount < auction.currentBid.amount) {
+                console.log("not sufficient amount");
                 throw new HTTP400Error("amount not sufficient to bid.")
             }
 
-            const body = {
+            const transactionBody = {
                 type: "Others",
                 amount: amount,
-                metadataType: "DEBIT",
+                metadataType: "Debit",
                 description: `Bidding for ${auctionId}`,
-                auctionId
-            }
+                phone:user.phone,
+                auctionId,
+                userId,
+              };
 
-            const transactionData = await this.transactionBodyCreator(body);
+            const transactiondetails = await this.transactionBodyCreator(transactionBody);
 
-            if (transactionData) {
-                await this.walletToMasterTransaction(transactionData);
+            const paymentBody = {
+                phone: user.phone,
+                amount: transactionBody.amount,
+                userId: transactionBody.userId,
+                isFreebie: false,
+                isPlatform: true,
+                metadata: {
+                    type: transactionBody.metadataType,
+                    description: transactionBody.description,
+                    auctionId: transactionBody.auctionId,
+                  },
+                description: transactionBody.description,
+                transactionId: transactiondetails._id,
+              };
+              console.log("payment body is ",paymentBody);
+              
+            if (transactiondetails) {
+                await this.walletToMasterTransaction(paymentBody);
             } 
             
 
-            return transactionData;
+            return transactiondetails;
 
         } catch (e) {
-            throw new HTTP400Error(e);
+            throw new HTTP400Error(e.message);
         }
     }
 

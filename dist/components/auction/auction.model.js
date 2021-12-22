@@ -13,12 +13,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuctionModel = void 0;
+const user_schema_1 = require("./../user/user.schema");
 const index_1 = require("./../../lib/utils/index");
 const auction_schema_1 = require("./auction.schema");
 // import { sendMessage } from "./../../lib/services/textlocal";
 const httpErrors_1 = require("../../lib/utils/httpErrors");
 const axios_1 = __importDefault(require("axios"));
-const transaction_model_1 = __importDefault(require("../transactions/transaction.model"));
 const transaction_schema_1 = require("../transactions/transaction.schema");
 const auctionEvent_model_1 = __importDefault(require("../auctionEvent/auctionEvent.model"));
 const auctionEvent_schema_1 = require("../auctionEvent/auctionEvent.schema");
@@ -113,38 +113,79 @@ class AuctionModel {
         });
     }
     ;
+    returnIkc(auctionId, userId, amount) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const user = yield user_schema_1.User.findById(userId);
+                const body = {
+                    type: "Others",
+                    amount: amount,
+                    phone: user.phone,
+                    metadataType: "Credit",
+                    description: `getting return from Bidding for ${auctionId}`,
+                    auctionId,
+                    userId
+                };
+                console.log("returning ikc ", body);
+                const transactionData = yield this.transactionBodyCreator(body);
+                const paymentBody = {
+                    type: "Others",
+                    amount: amount,
+                    phone: user.phone,
+                    metadataType: "Credit",
+                    description: `getting return from Bidding for ${auctionId}`,
+                    auctionId,
+                    userId,
+                    transactionId: transactionData._id
+                };
+                const res = yield this.masterToWalletTransaction(paymentBody);
+                if (!res)
+                    throw new httpErrors_1.HTTP400Error("Refund Faild for ", paymentBody.userId);
+                const transaction = yield transaction_schema_1.Transaction.findOneAndUpdate({ _id: paymentBody.transactionId }, {
+                    $set: { "status": "Returned" }
+                }, {
+                    new: true
+                });
+                console.log("status updated for transaciton ", transaction);
+                return res;
+            }
+            catch (e) {
+                console.log(e);
+                throw new httpErrors_1.HTTP400Error(e.message);
+            }
+        });
+    }
     changeCurrentBid(auctionId, userId, amount) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const auction = yield auction_schema_1.Auction.findById(auctionId);
-                const body = {
-                    type: "Others",
-                    amount: amount,
-                    metadataType: "CREDIT",
-                    description: `getting return from Bidding for ${auctionId}`,
-                    auctionId
-                };
-                const transactionData = yield this.transactionBodyCreator(body);
-                if (transactionData) {
-                    const res = yield this.masterToWalletTransaction(transactionData);
-                    if (res) {
-                        const currentBid = {
-                            user: userId,
-                            amount
-                        };
-                        const data = yield auction_schema_1.Auction.findOneAndUpdate({ _id: auctionId }, {
-                            $set: { "currentBid": currentBid },
-                            $push: { "previousBid": auction.currentBid }
-                        }, { new: true });
-                        return data;
-                    }
-                    else {
-                        throw new httpErrors_1.HTTP400Error("Master wallet to  wallet transaction failed");
-                    }
+                let isPreviousBid = false;
+                let lastBid;
+                let res;
+                if (auction.currentBid && auction.currentBid.user) {
+                    isPreviousBid = true;
+                    lastBid = auction.currentBid;
+                    console.log("prev bid ", lastBid);
+                    res = yield this.returnIkc(auctionId, lastBid.user, lastBid.amount);
+                }
+                if (res || !isPreviousBid) {
+                    const currentBid = {
+                        user: userId,
+                        amount
+                    };
+                    const data = yield auction_schema_1.Auction.findOneAndUpdate({ _id: auctionId }, {
+                        $set: { "currentBid": currentBid },
+                        $push: { "previousBid": auction.currentBid }
+                    }, { new: true });
+                    return data;
+                }
+                else {
+                    throw new httpErrors_1.HTTP400Error("Master wallet to  wallet transaction failed");
                 }
             }
             catch (e) {
-                throw new httpErrors_1.HTTP400Error(e);
+                console.log(e);
+                throw new httpErrors_1.HTTP400Error(e.message);
             }
         });
     }
@@ -187,7 +228,8 @@ class AuctionModel {
                 return res;
             }
             catch (e) {
-                throw new httpErrors_1.HTTP400Error(e);
+                console.log(e);
+                throw new httpErrors_1.HTTP400Error(e.message);
             }
         });
     }
@@ -200,6 +242,7 @@ class AuctionModel {
                     amount: body.amount,
                     type: body.type,
                     description: body.description,
+                    phone: body.phone,
                     metadata: {
                         type: body.metadataType,
                         description: body.description,
@@ -208,14 +251,15 @@ class AuctionModel {
                     status: "PENDING"
                 };
                 const transaction = new transaction_schema_1.Transaction(transactionBody);
-                const res = yield transaction_model_1.default.create(transaction);
+                const res = yield transaction.save();
                 if (!res) {
                     throw new httpErrors_1.HTTP400Error("Transaction creation failed");
                 }
-                return transactionBody;
+                return res;
             }
             catch (e) {
-                throw new httpErrors_1.HTTP400Error(e);
+                console.log(e);
+                throw new httpErrors_1.HTTP400Error(e.message);
             }
         });
     }
@@ -223,20 +267,20 @@ class AuctionModel {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const apiKey = process.env.IKCDEALKEY;
-                const url = `http://localhost:8000/wallet/removeFromWallet?apiKey=${apiKey}`;
+                const url = `${process.env.IKC_MASTER_WALLET_URI}/wallet/addToMasterWallet?apiKey=${apiKey}`;
+                console.log("url is ", url);
                 const res = yield this.axiosRequestor(url, transactionBody);
                 if (res.data.status) {
                     const currentBid = yield this.changeCurrentBid(transactionBody.metadata.auctionId, transactionBody.userId, transactionBody.amount);
                     if (!currentBid) {
                         throw new httpErrors_1.HTTP400Error("Change of current Bid Failed");
                     }
-                    console.log("Status transaction change");
-                    const transaction = yield transaction_schema_1.Transaction.findOneAndUpdate({ userId: transactionBody.userId }, {
+                    const transaction = yield transaction_schema_1.Transaction.findOneAndUpdate({ _id: transactionBody.transactionId }, {
                         $set: { "status": "TXN_SUCCESS" }
                     }, {
                         new: true
                     });
-                    console.log(transaction);
+                    console.log("Status transaction change", transaction);
                     if (transaction.status != "TXN_SUCCESS") {
                         throw Error(`Transaction status not updated for user ${transactionBody.userId}`);
                     }
@@ -247,7 +291,8 @@ class AuctionModel {
                 return res;
             }
             catch (e) {
-                throw new httpErrors_1.HTTP400Error(e);
+                console.log(e);
+                throw new httpErrors_1.HTTP400Error(e.message);
             }
         });
     }
@@ -256,7 +301,7 @@ class AuctionModel {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const apiKey = process.env.IKCDEALKEY;
-                const url = `http://localhost:8000/wallet/addToWallet?apiKey=${apiKey}`;
+                const url = `${process.env.IKC_MASTER_WALLET_URI}/wallet/addToWallet?apiKey=${apiKey}`;
                 const res = yield this.axiosRequestor(url, transactionBody);
                 if (res.data.status) {
                     console.log("Status transaction change");
@@ -265,7 +310,6 @@ class AuctionModel {
                     }, {
                         new: true
                     });
-                    console.log(transaction);
                     if (transaction.status != "TXN_SUCCESS") {
                         throw Error(`Transaction status not updated for user ${transactionBody.userId}`);
                     }
@@ -284,25 +328,47 @@ class AuctionModel {
     bid(auctionId, amount, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                console.log("bid request for ", amount, " ", auctionId);
+                const user = yield user_schema_1.User.findById(userId);
+                if (!user.phone)
+                    throw new httpErrors_1.HTTP400Error("User phone number is not added. Add phone number to continue..");
                 const auction = yield auction_schema_1.Auction.findById(auctionId);
                 if (amount < auction.startingBid || amount < auction.currentBid.amount) {
+                    console.log("not sufficient amount");
                     throw new httpErrors_1.HTTP400Error("amount not sufficient to bid.");
                 }
-                const body = {
+                const transactionBody = {
                     type: "Others",
                     amount: amount,
-                    metadataType: "DEBIT",
+                    metadataType: "Debit",
                     description: `Bidding for ${auctionId}`,
-                    auctionId
+                    phone: user.phone,
+                    auctionId,
+                    userId,
                 };
-                const transactionData = yield this.transactionBodyCreator(body);
-                if (transactionData) {
-                    yield this.walletToMasterTransaction(transactionData);
+                const transactiondetails = yield this.transactionBodyCreator(transactionBody);
+                const paymentBody = {
+                    phone: user.phone,
+                    amount: transactionBody.amount,
+                    userId: transactionBody.userId,
+                    isFreebie: false,
+                    isPlatform: true,
+                    metadata: {
+                        type: transactionBody.metadataType,
+                        description: transactionBody.description,
+                        auctionId: transactionBody.auctionId,
+                    },
+                    description: transactionBody.description,
+                    transactionId: transactiondetails._id,
+                };
+                console.log("payment body is ", paymentBody);
+                if (transactiondetails) {
+                    yield this.walletToMasterTransaction(paymentBody);
                 }
-                return transactionData;
+                return transactiondetails;
             }
             catch (e) {
-                throw new httpErrors_1.HTTP400Error(e);
+                throw new httpErrors_1.HTTP400Error(e.message);
             }
         });
     }
