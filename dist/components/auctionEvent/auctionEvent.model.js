@@ -55,6 +55,25 @@ class AuctionEventModel {
             }
         });
     }
+    past(body) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const today = Date.now();
+            console.log("date now is ", today);
+            let condition = {};
+            if (body.type == 'timed') {
+                condition = { endTime: { $lte: today }, type: "timed" };
+                return yield this.fetchAuctionEventByCondition(condition);
+            }
+            else if (body.type == 'live') {
+                condition = { startTime: { $lte: today }, type: "live" };
+                return yield this.fetchAuctionEventByCondition(condition);
+            }
+            else {
+                condition = { startTime: { $lte: today } };
+                return yield this.fetchAuctionEventByCondition(condition);
+            }
+        });
+    }
     fetch(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const conidtion = { _id: new bson_1.ObjectID(id) };

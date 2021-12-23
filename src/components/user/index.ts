@@ -18,6 +18,11 @@ export default [
     handler: [userController.fetchWalletBalance]
   },
   {
+    path: "/user/fetchWalletTransacions",
+    method: "get",
+    handler:[userController.fetchWalletTransaction]
+  },
+  {
     path: "/user/loggeduser",
     method: "get",
     handler:[userController.getLoggedUser]

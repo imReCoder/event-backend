@@ -301,6 +301,16 @@ class UserController {
       next(responseHandler.sendError(e))
     }
   }
+  public fetchWalletTransaction = async (req: Request, res: Response, next: NextFunction) => {
+    const responseHandler = new ResponseHandler();
+    try {
+      const data = await userModel.fetchWalletTransaction(req.userId,req.query.status);
+
+      responseHandler.reqRes(req, res).onFetch('Wallet Transaction Fetched Successfully', data).send();
+    } catch (e) {
+      next(responseHandler.sendError(e));
+    }
+  }
 
   public addPhoneNumber = async (req: Request, res: Response, next: NextFunction) => {
     const responseHandler = new ResponseHandler();

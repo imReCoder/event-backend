@@ -1,3 +1,4 @@
+import { transactionStatus } from './../transactions/transaction.interface';
 import {generateToken, imageUrl, isValidMongoId, otpGenerator} from "../../lib/helpers";
 import { User, UserSchema } from "./user.schema";
 import { IUser } from './user.interface';
@@ -11,6 +12,7 @@ import { ObjectID } from "bson";
 import { commonConfig } from "../../config";
 import { HTTP400Error, HTTP401Error, HTTPClientError } from "../../lib/utils/httpErrors";
 import HttpException from "../..//exceptions/HttpException";
+import transactionModel from '../transactions/transaction.model';
 
 export class UserModel {
     public async fetchAll() {
@@ -249,6 +251,37 @@ export class UserModel {
 
     return data;
   };
+  
+  public async fetchWalletTransaction(userId: string,status:transactionStatus) {
+    try {
+      const apiKey = process.env.IKCPLAYAPIKEY;
+      const url = process.env.IKC_MASTER_WALLET_URI;
+     console.log(userId);
+      const user = await User.findById(userId);
+
+      const phone = Number(user.phone);
+
+      if (!user || !user.phone) {
+        throw new HTTP400Error("User phone number is not added");
+      }
+      const transactions = await transactionModel.fetchTransactionsByUserId(userId,status);
+      // const res = await axios({
+      //   method: "GET",
+      //   url: `${url}/wallet/fetchTrasactions?apiKey=${apiKey}&phone=${phone}`
+      // });
+
+      // console.log(res.data);
+      // if (res && res.data.status) {
+      //   return res.data.payload;
+      // } else {
+      //   throw new HTTP400Error("Error fetching Wallet Transactions");
+      // }
+      if(!transactions || !transactions.length) throw new HTTP400Error("No transactions");
+      return transactions;
+    } catch (e) {
+      throw  new HTTP400Error(e.message);
+    }
+  }
 
   public async fetchWalletBalance(id:string) {
     try {

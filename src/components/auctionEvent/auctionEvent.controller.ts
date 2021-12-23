@@ -30,6 +30,16 @@ class AuctionEventController {
         }
     };
 
+    public pastEvents = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+        try {
+            console.log("fetching all");
+            responseHandler.reqRes(req, res).onFetch('FETCHED_UPCOMING_AUCTION_EVENTS', await auctionEventModel.past(req.query)).send();
+        } catch (e) {
+            // send error with next function.
+            next(responseHandler.sendError(e));
+        }
+    };
 
 
     public create = async (req: Request, res: Response, next: NextFunction) => {

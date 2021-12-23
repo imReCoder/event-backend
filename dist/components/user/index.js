@@ -22,6 +22,11 @@ exports.default = [
         handler: [user_controller_1.default.fetchWalletBalance]
     },
     {
+        path: "/user/fetchWalletTransacions",
+        method: "get",
+        handler: [user_controller_1.default.fetchWalletTransaction]
+    },
+    {
         path: "/user/loggeduser",
         method: "get",
         handler: [user_controller_1.default.getLoggedUser]

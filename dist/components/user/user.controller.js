@@ -283,6 +283,16 @@ class UserController {
                 next(responseHandler.sendError(e));
             }
         });
+        this.fetchWalletTransaction = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            const responseHandler = new responseHandler_1.default();
+            try {
+                const data = yield user_model_1.default.fetchWalletTransaction(req.userId, req.query.status);
+                responseHandler.reqRes(req, res).onFetch('Wallet Transaction Fetched Successfully', data).send();
+            }
+            catch (e) {
+                next(responseHandler.sendError(e));
+            }
+        });
         this.addPhoneNumber = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const responseHandler = new responseHandler_1.default();
             try {

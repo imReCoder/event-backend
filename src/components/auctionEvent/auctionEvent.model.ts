@@ -50,7 +50,23 @@ export class AuctionEventModel {
     }
 
     
-
+    public async past(body:any) {
+        const today = Date.now();
+        console.log("date now is ",today);
+        
+        let condition={};
+    
+        if(body.type=='timed'){
+            condition = {endTime: { $lte: today },type:"timed"};
+            return await this.fetchAuctionEventByCondition(condition);
+        }else if(body.type=='live'){
+            condition = {startTime: { $lte: today },type:"live"};
+            return await this.fetchAuctionEventByCondition(condition);
+        }else{
+            condition = {startTime: { $lte: today }};
+            return await this.fetchAuctionEventByCondition(condition);
+        }
+    }
 
     public async fetch(id: string) {
         const conidtion = {_id:new ObjectID(id)};

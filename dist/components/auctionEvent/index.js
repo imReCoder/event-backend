@@ -29,6 +29,12 @@ exports.default = [
         handler: [auctionEvent_controller_1.default.upcoming]
     },
     {
+        path: "/auctionevent/past",
+        method: "get",
+        escapeAuth: true,
+        handler: [auctionEvent_controller_1.default.pastEvents]
+    },
+    {
         path: "/auctionevent/:id",
         method: "get",
         escapeAuth: true,

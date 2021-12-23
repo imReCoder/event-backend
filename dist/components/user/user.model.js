@@ -23,6 +23,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bson_1 = require("bson");
 const config_1 = require("../../config");
 const httpErrors_1 = require("../../lib/utils/httpErrors");
+const transaction_model_1 = __importDefault(require("../transactions/transaction.model"));
 class UserModel {
     constructor() {
         // private async generateValidUsername(firstName: string, id: string | null = null) {
@@ -291,6 +292,37 @@ class UserModel {
         });
     }
     ;
+    fetchWalletTransaction(userId, status) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const apiKey = process.env.IKCPLAYAPIKEY;
+                const url = process.env.IKC_MASTER_WALLET_URI;
+                console.log(userId);
+                const user = yield user_schema_1.User.findById(userId);
+                const phone = Number(user.phone);
+                if (!user || !user.phone) {
+                    throw new httpErrors_1.HTTP400Error("User phone number is not added");
+                }
+                const transactions = yield transaction_model_1.default.fetchTransactionsByUserId(userId, status);
+                // const res = await axios({
+                //   method: "GET",
+                //   url: `${url}/wallet/fetchTrasactions?apiKey=${apiKey}&phone=${phone}`
+                // });
+                // console.log(res.data);
+                // if (res && res.data.status) {
+                //   return res.data.payload;
+                // } else {
+                //   throw new HTTP400Error("Error fetching Wallet Transactions");
+                // }
+                if (!transactions || !transactions.length)
+                    throw new httpErrors_1.HTTP400Error("No transactions");
+                return transactions;
+            }
+            catch (e) {
+                throw new httpErrors_1.HTTP400Error(e.message);
+            }
+        });
+    }
     fetchWalletBalance(id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
