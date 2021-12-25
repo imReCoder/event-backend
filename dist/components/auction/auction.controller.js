@@ -154,6 +154,16 @@ class AuctionController {
                 next(responseHandler.sendError(e));
             }
         });
+        this.fetchSimilarMin = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            const responseHandler = new responseHandler_1.default();
+            try {
+                const data = yield auction_model_1.default.fetchSimilarMin(req.params.id, req.query.page, req.userId);
+                responseHandler.reqRes(req, res).onCreate("Fetched Similar Auctions", data).send();
+            }
+            catch (e) {
+                next(responseHandler.sendError(e));
+            }
+        });
     }
 }
 exports.default = new AuctionController();

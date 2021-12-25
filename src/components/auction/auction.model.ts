@@ -556,6 +556,31 @@ export class AuctionModel {
         insesitiveTags.push(re);
       });
       const condition = { tags: { $in: insesitiveTags } };
+      const similarAuctions = await this.fetchAuctionItemsByCondition(condition,true,Number(pageNo));
+      console.log("found similar auctions : ", similarAuctions.length);
+      if (!similarAuctions || !similarAuctions.length)
+        throw new HTTP400Error("No_SIMILAR_AUCTIONS_FOUND");
+      return similarAuctions;
+    } catch (err) {
+      console.log(err);
+
+      throw new HTTP400Error(err.message);
+    }
+  }
+  public async fetchSimilarMin(auctionId: string,pageNo:string = "1",userId: string) {
+    try {
+        console.log("page is",pageNo);
+        
+      const auctionData = await Auction.findById(auctionId).lean();
+      if (!auctionData) throw new HTTP400Error("AUCTION_NOT_FOUND");
+      const tags = auctionData.tags;
+      if (!tags || !tags.length) throw new HTTP400Error("NO_TAGS_FOUND");
+      const insesitiveTags: any = [];
+      tags.forEach(function (item: string) {
+        var re = new RegExp(item, "i");
+        insesitiveTags.push(re);
+      });
+      const condition = { tags: { $in: insesitiveTags } };
       const similarAuctions = await this.fetchAuctionItemsByConditionMin(condition,true,Number(pageNo));
       console.log("found similar auctions : ", similarAuctions.length);
       if (!similarAuctions || !similarAuctions.length)
@@ -567,6 +592,8 @@ export class AuctionModel {
       throw new HTTP400Error(err.message);
     }
   }
+
+
 }
 
 export default new AuctionModel();

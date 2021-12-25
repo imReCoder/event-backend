@@ -160,6 +160,19 @@ class AuctionController {
         }
     };
 
+    public fetchSimilarMin = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+
+        try {
+            const data = await auctionModel.fetchSimilarMin(req.params.id,req.query.page,req.userId);
+
+            responseHandler.reqRes(req, res).onCreate("Fetched Similar Auctions", data).send();
+        } catch (e) {
+            next(responseHandler.sendError(e));
+        }
+    };
+
+
 }
 
 

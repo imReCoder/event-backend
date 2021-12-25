@@ -24,6 +24,12 @@ exports.default = [
         handler: [auction_controller_1.default.updateTags]
     },
     {
+        path: "/auction/similar/:id/min",
+        escapeAuth: true,
+        method: "get",
+        handler: [auction_controller_1.default.fetchSimilarMin]
+    },
+    {
         path: "/auction/similar/:id",
         escapeAuth: true,
         method: "get",
