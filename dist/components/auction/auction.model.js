@@ -22,7 +22,9 @@ const axios_1 = __importDefault(require("axios"));
 const transaction_schema_1 = require("../transactions/transaction.schema");
 const auctionEvent_model_1 = __importDefault(require("../auctionEvent/auctionEvent.model"));
 const auctionEvent_schema_1 = require("../auctionEvent/auctionEvent.schema");
-const defaults = 'title startTime endTime description type startingBid lastBid previousBid auctionEventId images currentBid createdAt updatedAt';
+const bson_1 = require("bson");
+const defaults = "title startTime endTime description type startingBid lastBid estimate lot previousBid auctionEventId images currentBid createdAt updatedAt selling_info";
+const defaultsMin = "title description type startingBidauctionEventId images currentBid";
 class AuctionModel {
     fetchAll() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -44,32 +46,60 @@ class AuctionModel {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield auction_schema_1.Auction.findByIdAndUpdate(id, body, {
                 runValidators: true,
-                new: true
+                new: true,
             });
             return data;
         });
     }
-    fetchAuctionItemsByCondition(condition) {
+    fetchAuctionItemsByCondition(condition, pagination = false, pageNo = 1) {
         return __awaiter(this, void 0, void 0, function* () {
-            const data = yield auction_schema_1.Auction.aggregate([
-                {
-                    $match: condition,
-                },
-                {
-                    $lookup: {
-                        from: "users",
-                        localField: "creator",
-                        foreignField: "_id",
-                        as: "user",
+            console.log("page no is ", pageNo);
+            let data;
+            if (pagination) {
+                const { skip, limit } = (0, index_1.getPaginationInfo)(pageNo);
+                data = yield auction_schema_1.Auction.aggregate([
+                    {
+                        $match: condition,
                     },
-                },
-                {
-                    $unwind: { path: "$user" },
-                },
-                {
-                    $project: Object.assign({ hosted_by: "$user.firstName", hoste_by_image: "$user.image" }, (0, index_1.mongoDBProjectFields)(defaults)),
-                },
-            ]);
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "creator",
+                            foreignField: "_id",
+                            as: "user",
+                        },
+                    },
+                    {
+                        $unwind: { path: "$user" },
+                    },
+                    { "$limit": skip + limit },
+                    { "$skip": skip },
+                    {
+                        $project: Object.assign({ hosted_by: "$user.firstName", hoste_by_image: "$user.image", total_bids: { $add: [{ $size: "$previousBid" }, 1] } }, (0, index_1.mongoDBProjectFields)(defaults)),
+                    },
+                ]);
+            }
+            else {
+                data = yield auction_schema_1.Auction.aggregate([
+                    {
+                        $match: condition,
+                    },
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "creator",
+                            foreignField: "_id",
+                            as: "user",
+                        },
+                    },
+                    {
+                        $unwind: { path: "$user" },
+                    },
+                    {
+                        $project: Object.assign({ hosted_by: "$user.firstName", hoste_by_image: "$user.image", total_bids: { $add: [{ $size: "$previousBid" }, 1] } }, (0, index_1.mongoDBProjectFields)(defaults)),
+                    },
+                ]);
+            }
             if (!data)
                 throw new httpErrors_1.HTTP400Error("ITEMS_NOT_FOUND");
             return data;
@@ -103,7 +133,7 @@ class AuctionModel {
                 // }
                 const q = new auction_schema_1.Auction(body);
                 const data = yield q.add();
-                const auctionEventUpdate = yield auctionEvent_schema_1.AuctionEvent.findByIdAndUpdate(auctionEventId, { "$push": { "auctionItems": q._id } }, { "new": true, "upsert": true });
+                const auctionEventUpdate = yield auctionEvent_schema_1.AuctionEvent.findByIdAndUpdate(auctionEventId, { $push: { auctionItems: q._id } }, { new: true, upsert: true });
                 return data;
             }
             catch (e) {
@@ -112,7 +142,6 @@ class AuctionModel {
             }
         });
     }
-    ;
     returnIkc(auctionId, userId, amount) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -124,7 +153,7 @@ class AuctionModel {
                     metadataType: "Credit",
                     description: `getting return from Bidding for ${auctionId}`,
                     auctionId,
-                    userId
+                    userId,
                 };
                 console.log("returning ikc ", body);
                 const transactionData = yield this.transactionBodyCreator(body);
@@ -136,15 +165,15 @@ class AuctionModel {
                     description: `getting return from Bidding for ${auctionId}`,
                     auctionId,
                     userId,
-                    transactionId: transactionData._id
+                    transactionId: transactionData._id,
                 };
                 const res = yield this.masterToWalletTransaction(paymentBody);
                 if (!res)
                     throw new httpErrors_1.HTTP400Error("Refund Faild for ", paymentBody.userId);
                 const transaction = yield transaction_schema_1.Transaction.findOneAndUpdate({ _id: paymentBody.transactionId }, {
-                    $set: { "status": "Returned" }
+                    $set: { status: "Returned" },
                 }, {
-                    new: true
+                    new: true,
                 });
                 console.log("status updated for transaciton ", transaction);
                 return res;
@@ -171,11 +200,11 @@ class AuctionModel {
                 if (res || !isPreviousBid) {
                     const currentBid = {
                         user: userId,
-                        amount
+                        amount,
                     };
                     const data = yield auction_schema_1.Auction.findOneAndUpdate({ _id: auctionId }, {
-                        $set: { "currentBid": currentBid },
-                        $push: { "previousBid": auction.currentBid }
+                        $set: { currentBid: currentBid },
+                        $push: { previousBid: auction.currentBid },
                     }, { new: true });
                     return data;
                 }
@@ -189,12 +218,11 @@ class AuctionModel {
             }
         });
     }
-    fetchAuctionItemsByAuctionEvent(auctionEventId) {
+    fetchAuctionItemsByAuctionEventMin(auctionEventId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const auctionItems = yield auction_schema_1.Auction.find({ auctionEventId: auctionEventId }).populate({
-                    path: 'auctionEventId'
-                });
+                const condition = { auctionEventId: new bson_1.ObjectID(auctionEventId) };
+                const auctionItems = yield this.fetchAuctionItemsByConditionMin(condition);
                 return auctionItems;
             }
             catch (e) {
@@ -202,12 +230,55 @@ class AuctionModel {
             }
         });
     }
+    fetchAuctionItemsByAuctionEvent(auctionEventId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const condition = { auctionEventId: new bson_1.ObjectID(auctionEventId) };
+                const auctionItems = yield this.fetchAuctionItemsByCondition(condition);
+                return auctionItems;
+            }
+            catch (e) {
+                throw new httpErrors_1.HTTP400Error(e);
+            }
+        });
+    }
+    fetchAuctionItemsByConditionMin(condition, pagination = false, pageNo = 1) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let data;
+            if (pagination) {
+                const { skip, limit } = (0, index_1.getPaginationInfo)(pageNo);
+                data = yield auction_schema_1.Auction.aggregate([
+                    {
+                        $match: condition,
+                    },
+                    { "$limit": skip + limit },
+                    { "$skip": skip },
+                    {
+                        $project: Object.assign({ total_bids: { $add: [{ $size: "$previousBid" }, 1] } }, (0, index_1.mongoDBProjectFields)(defaultsMin)),
+                    },
+                ]);
+            }
+            else {
+                data = yield auction_schema_1.Auction.aggregate([
+                    {
+                        $match: condition,
+                    },
+                    {
+                        $project: Object.assign({ total_bids: { $add: [{ $size: "$previousBid" }, 1] } }, (0, index_1.mongoDBProjectFields)(defaultsMin)),
+                    },
+                ]);
+            }
+            if (!data)
+                throw new httpErrors_1.HTTP400Error("ITEMS_NOT_FOUND");
+            return data;
+        });
+    }
     addImage(id, filelocation) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 console.log(id);
                 const data = yield auction_schema_1.Auction.findOneAndUpdate({ _id: id }, {
-                    $push: { "images": filelocation }
+                    $push: { images: filelocation },
                 }, { new: true });
                 return data;
             }
@@ -216,14 +287,13 @@ class AuctionModel {
             }
         });
     }
-    ;
     axiosRequestor(url, axiosdata = {}) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const res = yield (0, axios_1.default)({
                     method: "POST",
                     url,
-                    data: Object.assign({}, axiosdata)
+                    data: Object.assign({}, axiosdata),
                 });
                 return res;
             }
@@ -233,7 +303,6 @@ class AuctionModel {
             }
         });
     }
-    ;
     transactionBodyCreator(body) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -246,9 +315,9 @@ class AuctionModel {
                     metadata: {
                         type: body.metadataType,
                         description: body.description,
-                        auctionId: body.auctionId
+                        auctionId: body.auctionId,
                     },
-                    status: "PENDING"
+                    status: "PENDING",
                 };
                 const transaction = new transaction_schema_1.Transaction(transactionBody);
                 const res = yield transaction.save();
@@ -276,9 +345,9 @@ class AuctionModel {
                         throw new httpErrors_1.HTTP400Error("Change of current Bid Failed");
                     }
                     const transaction = yield transaction_schema_1.Transaction.findOneAndUpdate({ _id: transactionBody.transactionId }, {
-                        $set: { "status": "TXN_SUCCESS" }
+                        $set: { status: "TXN_SUCCESS" },
                     }, {
-                        new: true
+                        new: true,
                     });
                     console.log("Status transaction change", transaction);
                     if (transaction.status != "TXN_SUCCESS") {
@@ -296,7 +365,6 @@ class AuctionModel {
             }
         });
     }
-    ;
     masterToWalletTransaction(transactionBody) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -306,9 +374,9 @@ class AuctionModel {
                 if (res.data.status) {
                     console.log("Status transaction change");
                     const transaction = yield transaction_schema_1.Transaction.findOneAndUpdate({ userId: transactionBody.userId }, {
-                        $set: { "status": "TXN_SUCCESS" }
+                        $set: { status: "TXN_SUCCESS" },
                     }, {
-                        new: true
+                        new: true,
                     });
                     if (transaction.status != "TXN_SUCCESS") {
                         throw Error(`Transaction status not updated for user ${transactionBody.userId}`);
@@ -324,7 +392,6 @@ class AuctionModel {
             }
         });
     }
-    ;
     bid(auctionId, amount, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -380,6 +447,41 @@ class AuctionModel {
             if (!data.length)
                 throw new httpErrors_1.HTTP400Error("No results");
             return data;
+        });
+    }
+    updateTags(auctionId, tags, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let data = yield auction_schema_1.Auction.findByIdAndUpdate(auctionId, { tags: tags }, { new: true });
+            console.log("data is", data);
+            return data;
+        });
+    }
+    fetchSimilar(auctionId, pageNo = "1", userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log("page is", pageNo);
+                const auctionData = yield auction_schema_1.Auction.findById(auctionId).lean();
+                if (!auctionData)
+                    throw new httpErrors_1.HTTP400Error("AUCTION_NOT_FOUND");
+                const tags = auctionData.tags;
+                if (!tags || !tags.length)
+                    throw new httpErrors_1.HTTP400Error("NO_TAGS_FOUND");
+                const insesitiveTags = [];
+                tags.forEach(function (item) {
+                    var re = new RegExp(item, "i");
+                    insesitiveTags.push(re);
+                });
+                const condition = { tags: { $in: insesitiveTags } };
+                const similarAuctions = yield this.fetchAuctionItemsByConditionMin(condition, true, Number(pageNo));
+                console.log("found similar auctions : ", similarAuctions.length);
+                if (!similarAuctions || !similarAuctions.length)
+                    throw new httpErrors_1.HTTP400Error("No_SIMILAR_AUCTIONS_FOUND");
+                return similarAuctions;
+            }
+            catch (err) {
+                console.log(err);
+                throw new httpErrors_1.HTTP400Error(err.message);
+            }
         });
     }
 }

@@ -39,6 +39,8 @@ exports.AuctionSchema = new mongoose_1.Schema({
         type: Number,
         required: true
     },
+    estimate: String,
+    selling_info: String,
     currentBid: {
         user: {
             type: mongoose_1.Schema.Types.ObjectId,
@@ -53,6 +55,11 @@ exports.AuctionSchema = new mongoose_1.Schema({
             },
             amount: Number
         }],
+    lot: Number,
+    tags: {
+        type: [String],
+        validate: [arrayLimit, '{PATH} exceeds the limit of 5']
+    },
     creator: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "User",
@@ -66,5 +73,8 @@ exports.AuctionSchema.methods.add = function () {
         return this.save();
     });
 };
+function arrayLimit(val) {
+    return val.length <= 5;
+}
 exports.Auction = (0, mongoose_1.model)("Auction", exports.AuctionSchema);
 //# sourceMappingURL=auction.schema.js.map

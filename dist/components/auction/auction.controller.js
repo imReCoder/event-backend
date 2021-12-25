@@ -40,6 +40,16 @@ class AuctionController {
                 next(responseHandler.sendError(e));
             }
         });
+        this.fetchAuctionItemsByAuctionEventMin = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            const responseHandler = new responseHandler_1.default();
+            try {
+                const data = yield auction_model_1.default.fetchAuctionItemsByAuctionEventMin(req.params.auctionEventId);
+                responseHandler.reqRes(req, res).onFetch("AUCTION_ITEMS", data).send();
+            }
+            catch (e) {
+                next(responseHandler.sendError(e));
+            }
+        });
         this.fetchAuctionItemsByAuctionEvent = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const responseHandler = new responseHandler_1.default();
             try {
@@ -119,6 +129,26 @@ class AuctionController {
             try {
                 const data = yield auction_model_1.default.searchItem(req.params.key, req.userId);
                 responseHandler.reqRes(req, res).onCreate("Here is your search results", data).send();
+            }
+            catch (e) {
+                next(responseHandler.sendError(e));
+            }
+        });
+        this.updateTags = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            const responseHandler = new responseHandler_1.default();
+            try {
+                const data = yield auction_model_1.default.updateTags(req.params.id, req.body.tags, req.userId);
+                responseHandler.reqRes(req, res).onCreate("Tags updated", data).send();
+            }
+            catch (e) {
+                next(responseHandler.sendError(e));
+            }
+        });
+        this.fetchSimilar = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            const responseHandler = new responseHandler_1.default();
+            try {
+                const data = yield auction_model_1.default.fetchSimilar(req.params.id, req.query.page, req.userId);
+                responseHandler.reqRes(req, res).onCreate("Fetched Similar Auctions", data).send();
             }
             catch (e) {
                 next(responseHandler.sendError(e));

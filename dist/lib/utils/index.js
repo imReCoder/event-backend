@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mongoDBProjectFields = exports.applyRoutes = exports.applyMiddleware = void 0;
+exports.getPaginationInfo = exports.mongoDBProjectFields = exports.applyRoutes = exports.applyMiddleware = void 0;
 const auth_middleware_1 = require("../middleware/auth.middleware");
 // load all middleware with this function call
 const applyMiddleware = (middlewareWrappers, router) => {
@@ -42,4 +42,10 @@ const mongoDBProjectFields = (fieldsString, prefix) => {
     return result;
 };
 exports.mongoDBProjectFields = mongoDBProjectFields;
+const getPaginationInfo = (pageNo = 1) => {
+    const limit = 2;
+    const skip = (pageNo - 1) * limit;
+    return { limit, skip };
+};
+exports.getPaginationInfo = getPaginationInfo;
 //# sourceMappingURL=index.js.map

@@ -18,6 +18,24 @@ exports.default = [
         handler: [auction_controller_1.default.fetchAll]
     },
     {
+        path: "/auction/:id/tags/update",
+        escapeAuth: true,
+        method: "post",
+        handler: [auction_controller_1.default.updateTags]
+    },
+    {
+        path: "/auction/similar/:id",
+        escapeAuth: true,
+        method: "get",
+        handler: [auction_controller_1.default.fetchSimilar]
+    },
+    {
+        path: "/auction/:auctionEventId/fetch/min",
+        escapeAuth: true,
+        method: "get",
+        handler: [auction_controller_1.default.fetchAuctionItemsByAuctionEventMin]
+    },
+    {
         path: "/auction/:auctionEventId/fetch",
         escapeAuth: true,
         method: "get",

@@ -20,7 +20,7 @@ export const AuctionSchema: Schema = new Schema(
         images: [{
             type:String
         }],
-
+        
         description: {
             type:String,
             required:true
@@ -40,7 +40,8 @@ export const AuctionSchema: Schema = new Schema(
             type: Number,
             required:true
         },
-
+        estimate:String,
+        selling_info:String,
         currentBid: {
             user: {
                 type: Schema.Types.ObjectId,
@@ -56,7 +57,11 @@ export const AuctionSchema: Schema = new Schema(
             },
             amount: Number
         }],
-
+        lot:Number,
+        tags:{
+            type:[String],
+            validate: [arrayLimit, '{PATH} exceeds the limit of 5']
+        },
         creator: {
             type: Schema.Types.ObjectId,
             ref:"User",
@@ -72,5 +77,9 @@ AuctionSchema.methods.add = async function () {
     return this.save();
 }
 
+
+function arrayLimit(val:any) {
+    return val.length <= 5;
+  }
 
 export const Auction: Model<IAuctionModel> = model<IAuctionModel>("Auction", AuctionSchema);

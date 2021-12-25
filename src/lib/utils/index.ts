@@ -59,3 +59,10 @@ export const mongoDBProjectFields = (fieldsString: string, prefix?: string) => {
   });
   return result;
 };
+
+export const getPaginationInfo = (pageNo:number=1)=>{
+  const limit = 2;
+  const skip = (pageNo-1)*limit;
+  return {limit,skip};
+}
+

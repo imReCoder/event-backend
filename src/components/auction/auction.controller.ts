@@ -33,6 +33,17 @@ class AuctionController {
         }
     };
 
+    public fetchAuctionItemsByAuctionEventMin = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+        try {
+            const data = await auctionModel.fetchAuctionItemsByAuctionEventMin(req.params.auctionEventId);
+
+            responseHandler.reqRes(req, res).onFetch("AUCTION_ITEMS", data).send();
+        } catch (e) {
+            next(responseHandler.sendError(e));
+        }
+    };
+
     public fetchAuctionItemsByAuctionEvent = async (req: Request, res: Response, next: NextFunction) => {
         const responseHandler = new ResponseHandler();
         try {
@@ -121,6 +132,29 @@ class AuctionController {
             const data = await auctionModel.searchItem(req.params.key, req.userId);
 
             responseHandler.reqRes(req, res).onCreate("Here is your search results", data).send();
+        } catch (e) {
+            next(responseHandler.sendError(e));
+        }
+    };
+
+    public updateTags = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+
+        try {
+            const data = await auctionModel.updateTags(req.params.id,req.body.tags,req.userId);
+
+            responseHandler.reqRes(req, res).onCreate("Tags updated", data).send();
+        } catch (e) {
+            next(responseHandler.sendError(e));
+        }
+    };
+    public fetchSimilar = async (req: Request, res: Response, next: NextFunction) => {
+        const responseHandler = new ResponseHandler();
+
+        try {
+            const data = await auctionModel.fetchSimilar(req.params.id,req.query.page,req.userId);
+
+            responseHandler.reqRes(req, res).onCreate("Fetched Similar Auctions", data).send();
         } catch (e) {
             next(responseHandler.sendError(e));
         }
