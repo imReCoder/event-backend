@@ -75,7 +75,7 @@ class AuctionModel {
                     { "$limit": skip + limit },
                     { "$skip": skip },
                     {
-                        $project: Object.assign({ hosted_by: "$user.firstName", hoste_by_image: "$user.image", total_bids: { $add: [{ $size: "$previousBid" }, 1] } }, (0, index_1.mongoDBProjectFields)(defaults)),
+                        $project: Object.assign({ hosted_by: "$user.firstName", hosted_by_image: "$user.image", host_id: "$user._id", host_address: "$user.address", total_bids: { $add: [{ $size: "$previousBid" }, 1] } }, (0, index_1.mongoDBProjectFields)(defaults)),
                     },
                 ]);
             }
@@ -96,7 +96,7 @@ class AuctionModel {
                         $unwind: { path: "$user" },
                     },
                     {
-                        $project: Object.assign({ hosted_by: "$user.firstName", hoste_by_image: "$user.image", total_bids: { $add: [{ $size: "$previousBid" }, 1] } }, (0, index_1.mongoDBProjectFields)(defaults)),
+                        $project: Object.assign({ hosted_by: "$user.firstName", hoste_by_image: "$user.image", host_id: "$user._id", host_address: "$user.address", total_bids: { $add: [{ $size: "$previousBid" }, 1] } }, (0, index_1.mongoDBProjectFields)(defaults)),
                     },
                 ]);
             }

@@ -64,6 +64,7 @@ export const UserSchema: Schema = new Schema(
       type: Boolean,
       default:false
     },
+    address:[String],
     deactivation: {
       type: Boolean,
       default: false

@@ -96,6 +96,8 @@ export class AuctionEventModel {
             {
                 $project: {
                     hosted_by:"$user.firstName",
+                    host_id:"$user._id",
+                    host_address:"$user.address",
                     hoste_by_image:"$user.image",
                     display_image:"$coverImage",
                     total_items:{$size:"$auctionItems"},

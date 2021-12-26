@@ -78,7 +78,9 @@ export class AuctionModel {
       {
         $project: {
           hosted_by: "$user.firstName",
-          hoste_by_image: "$user.image",
+          hosted_by_image: "$user.image",
+          host_id:"$user._id",
+          host_address:"$user.address",
           total_bids:{$add:[{$size:"$previousBid"},1]},
           ...mongoDBProjectFields(defaults),
         },
@@ -105,6 +107,8 @@ export class AuctionModel {
           $project: {
             hosted_by: "$user.firstName",
             hoste_by_image: "$user.image",
+            host_id:"$user._id",
+            host_address:"$user.address",
             total_bids:{$add:[{$size:"$previousBid"},1]},
             ...mongoDBProjectFields(defaults),
           },

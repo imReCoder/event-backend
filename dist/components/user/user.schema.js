@@ -68,6 +68,7 @@ exports.UserSchema = new mongoose_1.Schema({
         type: Boolean,
         default: false
     },
+    address: [String],
     deactivation: {
         type: Boolean,
         default: false

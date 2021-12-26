@@ -101,7 +101,7 @@ class AuctionEventModel {
                     $unwind: { path: "$user" },
                 },
                 {
-                    $project: Object.assign({ hosted_by: "$user.firstName", hoste_by_image: "$user.image", display_image: "$coverImage", total_items: { $size: "$auctionItems" }, items: "$auctionItems", name: "$title", isLive: {
+                    $project: Object.assign({ hosted_by: "$user.firstName", host_id: "$user._id", host_address: "$user.address", hoste_by_image: "$user.image", display_image: "$coverImage", total_items: { $size: "$auctionItems" }, items: "$auctionItems", name: "$title", isLive: {
                             $cond: {
                                 if: {
                                     $eq: ['$type', "live"]
