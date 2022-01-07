@@ -4,7 +4,9 @@
 
 ``bash
   git clone repo_link
+  
   cd event-backend
+  
   npm install
   ``
 
