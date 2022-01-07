@@ -2,7 +2,7 @@
 
 ##installation
 
-``bash
+``
 
   git clone repo_link
   
